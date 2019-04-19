@@ -1,0 +1,10 @@
+net.epconsortium.cryptomarket
+net.epconsortium.cryptomarket.commands
+net.epconsortium.cryptomarket.conversation
+net.epconsortium.cryptomarket.conversation.prompt
+net.epconsortium.cryptomarket.database
+net.epconsortium.cryptomarket.database.dao
+net.epconsortium.cryptomarket.finances
+net.epconsortium.cryptomarket.task
+net.epconsortium.cryptomarket.ui
+net.epconsortium.cryptomarket.util
