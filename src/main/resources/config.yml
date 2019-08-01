@@ -1,0 +1,206 @@
+#API KEY para acessar os valores das moedas, USE A KEY PADRÃO APENAS PARA TESTES
+api-key: "99X0JFXBLX2YRZA7"
+#O intervalo para atualizar os valores das moedas (em minutos)
+#(Por favor, perceba que a API tem um limite de 500 requisições por dia,
+#então se você definir um valor que vá ultrapassar esse limite, o plugin vai escolher um automaticamente)
+update-interval: 60
+#O intervalo em que os dados dos investidores serão salvos (em minutos)
+saving-interval: 5
+#O intervalo para atualizar a lista dos mais ricos (em minutos)
+richers-update-interval: 15
+#MySQL
+mysql:
+  #Você quer usar MySQL? Se não, SQLite será usado
+  enabled: false
+  hostname: "localhost"
+  port: 3306
+  database: "cryptomarket"
+  user: "root"
+  password: "1234"
+#Defina aqui a moeda física (ex.: BRL, USD) que será usada para comparar com a moeda digital
+physical-currency: BRL
+#Moedas com as quais o plugin trabalhará (você pode encontrar uma lista de moedas válidas dentro do JAR, no arquivo digital_currency_list.csv)
+coins:
+- BTC
+- LTC
+- ETH
+#O menu principal do plugin, acessado usando /cryptomarket
+menu:
+  #Nome do menu
+  name: "&7CryptoMarket"
+  items:
+    #O item que mostra os valores atuais das moedas
+    coins:
+      name: "&7Moedas / Valores"
+      # {0} é substituído pela linhas das moedas
+      lore:
+        - " "
+        - "&f{0}"
+        - " "
+        - "&7Botão direito - &aComprar"
+        - "&7Botão esquerdo - &cVender"
+      #Para cada moeda que você adicionou na lista de moedas, uma linha de moeda será adiciona na lore
+      # {0} é o nome da moeda
+      # {1} é o valor
+      coin-line: "&f{0} &7{1}"
+      #Mensagem mostrada no lugar do valor quando houve um erro
+      error-no-data: "Erro, atualize!"
+    #O item mque mostra o saldo atual do investidor
+    wallet:
+      name: "&3Carteira"
+      # {0} é o saldo do investidor na moeda do servidor (Vault)
+      # {1} é substituído pela linhas das moedas (funciona da mesma forma que o item Coins acima)
+      lore:
+        - " "
+        - "&f{0}"
+        - " "
+        - "&f{1}"
+      #Por favor, dê uma olhada no item Coins, eles funciona da mesma forma
+      coin-line: "&f{0} &7{1}"
+    #O item que mostra o lucro se o investidor vender todo o seu saldo de tal moeda
+    profit:
+      name: "&fLucro vendendo agora"
+      # {0} é substituído pela linhas das moedas (funciona da mesma forma que o item Coins acima)
+      lore:
+          - " "
+          - "{0}"
+          - " "
+      #Para cada moeda que você adicionou na lista de moedas, uma linha de moeda será adiciona na lore
+      # {0} é o nome da moeda
+      # {1} é a cor
+      # {2} é a porcentagem (pode ser negativa, significando uma perda)
+      coin-line: "&f{0} {1}{2}%"
+      # Estas são as cores que o "{1}" na configuração de cima vai usar de acordo com o valor
+      color:
+          positive: '&a'
+          neuter: '&f'
+          negative: '&c'
+    calendar: "&aCalendário"
+    update: "&aAtualizar"
+    ranking: "&aRanking"
+#O menu Calendário, acessado pelo menu Principal
+#Ele mostra os valores de dias anteriores
+calendar:
+    name: "&fCalendário"
+    items:
+        back: "&aVOLTAR"
+        next-month: "&aPróximo Mês"
+        previous-month: "&aMês Anterior"
+        #Configura um único dia do calendário
+        day:
+            # {0} é o número do dia
+            name: "&fDia {0}"
+            #Isso aqui funciona como o item Coins, dá uma olhada nele
+            lore:
+                - " "
+                - "{0}"
+                - " "
+            #Também funciona como o item Coins
+            coin-line: "{0} {1}"
+            #Isso é mostrado em dias depois de hoje, quando não tem valor ainda
+            no-rates: "&c&oSem dados"
+            #Mensagem mostrada ao invés do valor quando houve um erro
+            error-no-data: "Erro, atualize!"
+#O menu Ranking, também acessado pelo menu Principal
+ranking:
+    name: "&fRanking"
+    items:
+        back: "&aVOLTAR"
+        #Configura um item que representa um dos mais ricos
+        richer:
+            # {0} é a posição do jogador no ranking
+            # {1} é o nome do investidor
+            name: "#{0} {1}"
+            # {0} é o total investidor convertido para moeda do servidor
+            # {1} é a porcentagem comparada ao total investido no servidor
+            lore:
+                - " "
+                - "{0} ({1}%)"
+                - " "
+            #Se não houver um investidor no ranking
+            # {0} é a posição no ranking
+            no-investor: "#{0} Sem investidor"
+        total-investments:
+            name: "&fTotal de investimentos"
+            # {0} é o total de investimentos no servidor
+            lore:
+                - " "
+                - "{0}"
+                - " "
+        last-updated:
+            name: "&fAtualizado pela última vez"
+            # {0} é a data e hora
+            lore:
+                - " "
+                - "{0}"
+                - " "
+#Configuração relativa ao chat de negociação, iniciada usando o botão Moedas no menu principal
+negotiation-chat:
+  #Prefiro do chat
+  prefix: "&7[CryptoMarket] "
+  #O que o jogador precisa digitar para sair do chat
+  exit-word: "sair"
+  #Primeira mensagem do chat, {0} é a palavra de saída (definida acima)
+  warning: "&fPara sair da negociação, digite &7{0}&f a qualquer momento."
+  choose-coin: "&fQual moeda deseja negociar?"
+  # {0} é uma lista formatada de moedas
+  valid-coins: "&fMoedas válidas: {0}"
+  how-much-buy: "&fQuanto você deseja comprar?"
+  how-much-sell: "&fQuanto você deseja vender?"
+  error-insufficient-balance: "&fVocê não tem saldo suficiente!"
+  #Se o usuário não inserir números ou um positivo
+  error-invalid-value: "&fPor favor, insira um valor válido!"
+  #Se houve um erro buscando os valores das moedas
+  error-outdated-data: "&fA negociação falhou: a data está desatualizada! Por favor, use o botão/comando Atualizar!"
+  #Tudo está pronto para finalizar a negociação, tudo que o jogador precisa é confirmar
+  # {0} é a ação (sell-action or buy-action)
+  # {1} é a quantidade
+  # {2} é a moeda digital
+  # {3} é o valor em moeda do servidor
+  confirmation: "&fVocê quer &7{0} {1} {2} &fpor &7{3} &fmoedas?"
+  #Palavra usada para confirmar a negociação
+  yes-word: "sim"
+  #Palavra usada para cancelar a negociação
+  cancel-word: "cancelar"
+  sell-action: "vender"
+  buy-action: "comprar"
+  #Última mensagem
+  success: "&fNegociação bem sucedida!"
+#Algumas mensagem que o plugin vai enviar
+messages:
+  error-player-not-found: "&fO jogador inserido não é válido!"
+  error-invalid-amount: "&fA quantidade inserida não é um número válido ou é igual ou menor que zero!"
+  error-invalid-coin: "&fA moeda inserida não é válida!"
+  error-take-insufficient-balance: "&fO jogador não tem saldo suficiente!"
+  error-database: "&fHouve um erro ao conectar ao banco de dados, contate um admin, por favor!"
+  error-no-permission: "&fVocê não têm permissão para fazer isso!"
+  saving-data: "&fSalvando dados..."
+  player-balance-updated: "&fSaldo de {0} atualizado!"
+  # {0} é o tempo aproximado em minutos para completar a atualização, considerando os limites da API
+  updating-content: "&fAtualizando conteúdo, por favor, aguarde {0} minuto(s)!"
+  already-uptodate: "&fIsso não é necessário, o conteúdo já está atualizado ou uma atualização está em andamento!"
+  balance: "&fSeu saldo é:"
+  #Isso será enviado depois de balance
+  #Uma mensagem para cada moeda definida na config
+  # {0} é o nome da moeda
+  # {1} é o valor
+  balance-per-coin: "&a{0}: &f{1}"
+  current-rates: "As moedas valem:"
+  #Isso será enviado depois de current-rates
+  #Uma mensagem para cada moeda definida na config
+  # {0} é o nome da moeda
+  # {1} é o valor
+  current-rates-per-coin: "&a{0}: &f{1}"
+  outdated-data: "Data desatualizada, por favor atualize!"
+  #Se ocorreu um erro ao abrir o menu Ranking
+  error-ranking-data: "&fHouve um erro ao acessar a data do Ranking, contate um administrador por favor!"
+  new-balance: "&fSeu novo saldo de &7{0} &fé: &7{1}"
+  help-command:
+  - "&bCryptoMarket - Ajuda"
+  - "&b/cm balance - mostra seu saldo"
+  - "&b/cm today - mostra os valores de hoje"
+  - "&b/cm update - atualiza os valores das moedas"
+  - "&c/cm save - salva os dados no banco de dados"
+  - "&c/cm give <jogador> <quantidade> <moeda> - dá a quantidade da moeda ao jogador"
+  - "&c/cm take <jogador> <quantidade> <moeda> - tira a quantidade da moeda do jogador"
+  - "&c/cm set <jogador> <quantidade> <moeda> - define a quantidade da moeda como o saldo do jogador"

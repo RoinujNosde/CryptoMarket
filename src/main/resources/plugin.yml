@@ -1,0 +1,37 @@
+name: ${project.name}
+main: net.epconsortium.cryptomarket.CryptoMarket
+version: ${project.version}
+api-version: 1.13
+description: ${project.description}
+authors:
+- RoinujNosde
+- ZaHadden
+permissions::
+  cryptomarket.menu:
+    default: true
+  cryptomarket.negotiate:
+    default: true
+  cryptomarket.ranking:
+    default: true
+  cryptomarket.calendar:
+    default: true
+  cryptomarket.balance:
+    default: true
+  cryptomarket.today:
+    default: true
+  cryptomarket.update:
+    default: true
+  cryptomarket.save:
+    default: op
+  cryptomarket.give:
+    default: op
+  cryptomarket.take:
+    default: op
+  cryptomarket.set:
+    default: op
+commands:
+  cryptomarket:
+    aliases: [cm, cpm, crypto]
+    usage: "§cUse /<command> help to see the correct usage!"
+depend:
+- Vault
