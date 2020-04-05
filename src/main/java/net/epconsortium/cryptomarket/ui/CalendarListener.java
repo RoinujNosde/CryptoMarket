@@ -33,7 +33,7 @@ public class CalendarListener implements Listener {
         }
         event.setCancelled(true);
 
-        if (event.getClickedInventory().getName().equals(
+        if (event.getView().getTitle().equals(
                 config.getCalendarMenuName())) {
             if (processBackButton(event, player)) {
                 return;
@@ -48,7 +48,7 @@ public class CalendarListener implements Listener {
 
     @EventHandler
     public void onInventoryClose(InventoryCloseEvent event) {
-        String name = event.getInventory().getName();
+        String name = event.getView().getTitle();
         if (name == null || !name.equals(config.getCalendarMenuName())) {
             return;
         }

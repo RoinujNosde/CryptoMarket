@@ -14,7 +14,7 @@ class Helper {
     static boolean isCustomInventory(InventoryClickEvent event) {
         Objects.requireNonNull(event);
 
-        return event.getInventory().getName() != null
+        return event.getView().getTitle() != null
                 && event.getCurrentItem() != null
                 && event.getCurrentItem().hasItemMeta()
                 && event.getCurrentItem().getItemMeta().hasDisplayName();

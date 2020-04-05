@@ -1,15 +1,15 @@
 package net.epconsortium.cryptomarket.database;
 
-import com.mysql.cj.jdbc.MysqlDataSource;
-import net.epconsortium.cryptomarket.CryptoMarket;
-import net.epconsortium.cryptomarket.util.Configuration;
-import org.sqlite.SQLiteDataSource;
-
 import java.io.File;
 import java.io.IOException;
 import java.sql.Connection;
+import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.util.Objects;
+import java.util.Properties;
+
+import net.epconsortium.cryptomarket.CryptoMarket;
+import net.epconsortium.cryptomarket.util.Configuration;
 
 /**
  * Class used to create a Connection object
@@ -58,10 +58,15 @@ public class ConnectionFactory {
         } catch (IOException ex) {
             throw new SQLException(ex);
         }
-
-        SQLiteDataSource dataSource = new SQLiteDataSource();
-        dataSource.setUrl("jdbc:sqlite:" + file.getAbsolutePath());
-        Connection connection = dataSource.getConnection();
+        
+        Connection connection = null;
+        
+        try {
+            Class.forName("org.sqlite.JDBC");
+            connection = DriverManager.getConnection("jdbc:sqlite:" + file.getAbsolutePath());
+        } catch (ClassNotFoundException e) {
+        	throw new SQLException(e);
+        }
 
         return connection;
     }
@@ -73,15 +78,21 @@ public class ConnectionFactory {
      * @throws SQLException
      */
     private Connection getMySQLConnection() throws SQLException {
-        MysqlDataSource dataSource = new MysqlDataSource();
-        dataSource.setUser(config.getMySQLUser());
-        dataSource.setPassword(config.getMySQLPassword());
-        dataSource.setServerName(config.getMySQLHostname());
-        dataSource.setPort(config.getMySQLPort());
-        dataSource.setDatabaseName(config.getMySQLDatabaseName());
-        dataSource.setUseSSL(false);
+        Connection connection = null;
         
-        Connection connection = dataSource.getConnection();
+        Properties properties = new Properties();
+        properties.setProperty("user", config.getMySQLUser());
+        properties.setProperty("password", config.getMySQLPassword());
+        properties.setProperty("useSSL", "false");
+        properties.setProperty("characterEncoding", "utf-8");
+        properties.setProperty("autoReconnect", "true");
+        
+    	try {
+            Class.forName("com.mysql.jdbc.Driver");
+            connection = DriverManager.getConnection("jdbc:mysql://" + config.getMySQLHostname() + ":" + config.getMySQLPort() + "/" + config.getMySQLDatabaseName(), properties);
+        } catch (ClassNotFoundException e) {
+        	throw new SQLException(e);
+        }
 
         return connection;
     }

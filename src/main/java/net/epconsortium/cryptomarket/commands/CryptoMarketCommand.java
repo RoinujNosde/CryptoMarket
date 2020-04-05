@@ -44,7 +44,6 @@ public class CryptoMarketCommand implements CommandExecutor, TabCompleter {
             String label, String[] args) {
         if (commandSender instanceof Player) {
             Player player = (Player) commandSender;
-            player.sendMessage("Entity ID for "+ player.getName() + "is " +player.getEntityId());
             
             if (args.length != 0) {
                 String subCommand = args[0].toLowerCase();

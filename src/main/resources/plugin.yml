@@ -1,12 +1,12 @@
 name: ${project.name}
 main: net.epconsortium.cryptomarket.CryptoMarket
 version: ${project.version}
-api-version: 1.13
+api-version: 1.15
 description: ${project.description}
 authors:
 - RoinujNosde
 - ZaHadden
-permissions::
+permissions:
   cryptomarket.menu:
     default: true
   cryptomarket.negotiate:
@@ -32,6 +32,6 @@ permissions::
 commands:
   cryptomarket:
     aliases: [cm, cpm, crypto]
-    usage: "§cUse /<command> help to see the correct usage!"
+    usage: "Use /<command> help to see the correct usage!"
 depend:
 - Vault

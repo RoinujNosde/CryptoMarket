@@ -33,7 +33,7 @@ public class RankingListener implements Listener {
         }
         event.setCancelled(true);
 
-        if (event.getInventory().getName().equals(config.getRankingMenuName())) {
+        if (event.getView().getTitle().equals(config.getRankingMenuName())) {
             processBackButton(event, player);
         }
     }

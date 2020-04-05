@@ -10,6 +10,7 @@ import org.bukkit.command.PluginCommand;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.RegisteredServiceProvider;
 import org.bukkit.plugin.java.JavaPlugin;
+import org.bukkit.scheduler.BukkitRunnable;
 
 import java.util.logging.Level;
 import net.epconsortium.cryptomarket.database.dao.InvestorDao;
@@ -57,30 +58,38 @@ public class CryptoMarket extends JavaPlugin {
             return;
         }
 
-        // Atualizando as cotações
-        ExchangeRates rates = new ExchangeRates(this);
-        rates.updateAll();
-        // Iniciando tarefa repetitiva de atualizacão de cotações
-        updateRates = new UpdateExchangeRatesTask(rates);
-        updateRates.start(this);
-        //Starting the Save Investors task
-        saveInvestors = new SaveInvestorsTask(this);
-        saveInvestors.start();
-
         debug = getConfig().getBoolean("debug", false);
 
         InvestorDao.configureDatabase(this, (success) -> {
-            if (!success) {
-                getServer().getPluginManager().disablePlugin(this);
-            } else {
-                getServer().getConsoleSender().sendMessage(
-                        "[CryptoMarket] Database configured successfuly!");
-            }
+        	new BukkitRunnable() {
+				
+				@Override
+				public void run() {
+		            if (!success) {
+		                getServer().getPluginManager().disablePlugin(CryptoMarket.this);
+		            } else {
+		                getServer().getConsoleSender().sendMessage(
+		                        "[CryptoMarket] Database configured successfuly!");
+		                
+		                ExchangeRates rates = new ExchangeRates(CryptoMarket.this);
+		                rates.updateAll();
+		                
+		                updateRates = new UpdateExchangeRatesTask(rates);
+		                updateRates.start(CryptoMarket.this);
+		                
+		                saveInvestors = new SaveInvestorsTask(CryptoMarket.this);
+		                saveInvestors.start();
+		            }					
+				}
+			}.runTask(this);
+
         });
     }
 
     @Override
     public void onDisable() {
+    	if (saveInvestors == null || updateRates == null) return;
+    	
         new InvestorDao(this).saveAll();
         saveInvestors.cancel();
         updateRates.cancel();
