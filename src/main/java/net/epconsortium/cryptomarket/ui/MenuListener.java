@@ -35,9 +35,10 @@ public class MenuListener implements Listener {
         if (!Helper.isCustomInventory(event)) {
             return;
         }
-        event.setCancelled(true);
 
         if (event.getView().getTitle().equals(config.getMenuName())) {
+            event.setCancelled(true);
+
             if (processCoinsButton(event, player)) {
                 return;
             }

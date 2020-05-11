@@ -31,10 +31,11 @@ public class CalendarListener implements Listener {
         if (!Helper.isCustomInventory(event)) {
             return;
         }
-        event.setCancelled(true);
 
         if (event.getView().getTitle().equals(
                 config.getCalendarMenuName())) {
+            event.setCancelled(true);
+
             if (processBackButton(event, player)) {
                 return;
             }
