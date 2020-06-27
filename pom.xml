@@ -57,10 +57,10 @@
 	</dependencies>
 	
 	<distributionManagement>
-   		<repository>
-     			<id>github</id>
-     			<name>GitHub RoinujNosde's Apache Maven Packages</name>
-     			<url>https://maven.pkg.github.com/RoinujNosde/CryptoMarket</url>
-   		</repository>
+		<repository>
+			<id>bintray-roinujnosde-bukkit-plugins</id>
+			<name>roinujnosde-bukkit-plugins</name>
+			<url>https://api.bintray.com/maven/roinujnosde/bukkit-plugins/CryptoMarket/;publish=1</url>
+		</repository>
 </distributionManagement>
 </project>

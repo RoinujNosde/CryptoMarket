@@ -46,7 +46,7 @@ public class CryptoMarket extends JavaPlugin {
         pluginManager.registerEvents(new RankingListener(this), this);
 
         //Comandos
-        PluginCommand command = getCommand("cryptomarket");
+		PluginCommand command = getCommand("cryptomarket");
         CryptoMarketCommand cmd = new CryptoMarketCommand(this);
         command.setExecutor(cmd);
         command.setTabCompleter(cmd);
