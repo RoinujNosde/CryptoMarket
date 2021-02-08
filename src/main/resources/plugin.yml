@@ -1,7 +1,7 @@
 name: ${project.name}
 main: net.epconsortium.cryptomarket.CryptoMarket
 version: ${project.version}
-api-version: 1.15
+api-version: 1.13
 description: ${project.description}
 authors:
 - RoinujNosde

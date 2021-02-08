@@ -1,6 +1,8 @@
 package net.epconsortium.cryptomarket.ui;
 
 import java.math.BigDecimal;
+
+import com.cryptomorin.xseries.XMaterial;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.enchantments.Enchantment;
@@ -79,14 +81,13 @@ public class Menu {
         ItemStack wallet = configureItemWallet();
         ItemStack ranking = configureItemRanking();
         ItemStack profit = configureProfitItem();
-        ItemStack calendar = configureGenericItem(Material.FILLED_MAP,
+        ItemStack calendar = configureGenericItem(XMaterial.FILLED_MAP,
                 config.getButtonCalendarName());
-        ItemStack update = configureGenericItem(Material.STRUCTURE_VOID,
+        ItemStack update = configureGenericItem(XMaterial.STRUCTURE_VOID,
                 config.getButtonUpdateName());
         ItemStack blackGlass = configureGenericItem(
-                Material.BLACK_STAINED_GLASS_PANE, " ");
-        ItemStack grayGlass = configureGenericItem(
-                Material.GRAY_STAINED_GLASS_PANE, " ");
+                XMaterial.BLACK_STAINED_GLASS_PANE, " ");
+        ItemStack grayGlass = configureGenericItem(XMaterial.GRAY_STAINED_GLASS_PANE, " ");
 
         setButtonsPositions(coins, wallet, profit, calendar, update, blackGlass,
                 grayGlass, ranking);
@@ -98,7 +99,10 @@ public class Menu {
      * @return the profit item
      */
     private ItemStack configureProfitItem() {
-        ItemStack profit = new ItemStack(Material.LIME_DYE);
+        ItemStack profit = XMaterial.LIME_DYE.parseItem(true);
+        if (profit == null) {
+            profit = new ItemStack(Material.STONE);
+        }
         ItemMeta profitMeta = profit.getItemMeta();
         profitMeta.setDisplayName(config.getButtonProfitName());
 
@@ -156,8 +160,11 @@ public class Menu {
      * @param name name
      * @return item
      */
-    private ItemStack configureGenericItem(Material material, String name) {
-        ItemStack stack = new ItemStack(material);
+    private ItemStack configureGenericItem(XMaterial material, String name) {
+        ItemStack stack = material.parseItem(true);
+        if (stack == null) {
+            stack = new ItemStack(Material.STONE);
+        }
         ItemMeta meta = stack.getItemMeta();
         meta.setDisplayName(name);
         stack.setItemMeta(meta);
@@ -171,7 +178,10 @@ public class Menu {
      * @return Wallet item
      */
     private ItemStack configureItemWallet() {
-        ItemStack wallet = new ItemStack(Material.BOOK);
+        ItemStack wallet = XMaterial.BOOK.parseItem(true);
+        if (wallet == null) {
+            wallet = new ItemStack(Material.STONE);
+        }
         ItemMeta meta = wallet.getItemMeta();
         meta.setDisplayName(config.getButtonWalletName());
         configureItemWalletLore(meta);
@@ -185,7 +195,10 @@ public class Menu {
      * @return Coins item
      */
     private ItemStack configureItemCoins() {
-        ItemStack coins = new ItemStack(Material.SUNFLOWER);
+        ItemStack coins = XMaterial.SUNFLOWER.parseItem(true);
+        if (coins == null) {
+            coins = new ItemStack(Material.STONE);
+        }
         ItemMeta meta = coins.getItemMeta();
         meta.addEnchant(Enchantment.ARROW_DAMAGE, 1, false);
         meta.addItemFlags(ItemFlag.HIDE_ENCHANTS);
@@ -289,7 +302,10 @@ public class Menu {
      * @return Ranking item
      */
     private ItemStack configureItemRanking() {
-        ItemStack ranking = new ItemStack(Material.PLAYER_HEAD);
+        ItemStack ranking = XMaterial.PLAYER_HEAD.parseItem(true);
+        if (ranking == null) {
+            ranking = new ItemStack(Material.STONE);
+        }
         ItemMeta rankingMeta = ranking.getItemMeta();
         rankingMeta.setDisplayName(config.getButtonRankingName());
         ranking.setItemMeta(rankingMeta);
@@ -306,7 +322,6 @@ public class Menu {
      * @param update
      * @param blackGlass
      * @param greyGlass
-     * @param dlc
      * @param ranking
      */
     private void setButtonsPositions(ItemStack coins, ItemStack wallet,

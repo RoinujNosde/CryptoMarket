@@ -1,5 +1,20 @@
 package net.epconsortium.cryptomarket.ui;
 
+import com.cryptomorin.xseries.XMaterial;
+import net.epconsortium.cryptomarket.CryptoMarket;
+import net.epconsortium.cryptomarket.database.dao.Investor;
+import net.epconsortium.cryptomarket.finances.Economy;
+import net.epconsortium.cryptomarket.util.Configuration;
+import net.epconsortium.cryptomarket.util.Formatter;
+import org.bukkit.Bukkit;
+import org.bukkit.Material;
+import org.bukkit.entity.Player;
+import org.bukkit.inventory.Inventory;
+import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.ItemMeta;
+import org.bukkit.inventory.meta.SkullMeta;
+import org.bukkit.scheduler.BukkitRunnable;
+
 import java.math.BigDecimal;
 import java.text.MessageFormat;
 import java.time.format.DateTimeFormatter;
@@ -7,22 +22,9 @@ import java.time.format.FormatStyle;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
-import org.bukkit.Bukkit;
-import org.bukkit.Material;
-import org.bukkit.entity.Player;
-import org.bukkit.inventory.Inventory;
-import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.meta.ItemMeta;
-
-import net.epconsortium.cryptomarket.CryptoMarket;
-import net.epconsortium.cryptomarket.finances.Economy;
-import net.epconsortium.cryptomarket.database.dao.Investor;
-import net.epconsortium.cryptomarket.util.Configuration;
-import net.epconsortium.cryptomarket.util.Formatter;
-import org.bukkit.inventory.meta.SkullMeta;
-import org.bukkit.scheduler.BukkitRunnable;
 
 import static net.epconsortium.cryptomarket.CryptoMarket.debug;
+import static org.bukkit.Material.STONE;
 
 /**
  * Represents the Ranking menu
@@ -84,8 +86,8 @@ public class Ranking {
     private ItemStack getRicher(int index) {
         Economy econ = new Economy(plugin, "");
 
-        ItemStack head = new ItemStack(Material.PLAYER_HEAD);
-        ItemMeta meta = head.getItemMeta();
+        ItemStack head = XMaterial.PLAYER_HEAD.parseItem(true);
+        ItemMeta meta = Objects.requireNonNull(head).getItemMeta();
 
         int rank = index + 1;
 
@@ -96,7 +98,7 @@ public class Ranking {
         } else {
             Investor richer = richersList.get(index);
             SkullMeta skullMeta = (SkullMeta) head.getItemMeta();
-            skullMeta.setOwningPlayer(richer.getPlayer());
+            skullMeta.setOwner(richer.getPlayer().getName());
             skullMeta.setDisplayName(MessageFormat.format(
                     config.getRankingMenuRicherItemName(), rank,
                     richer.getPlayer().getName()));
@@ -133,15 +135,15 @@ public class Ranking {
         ItemStack total = configureTotalInvestmentsItem();
         ItemStack lastUpdated = configureLastUpdated();
         ItemStack back = configureBackButton();
-        ItemStack black = configureGenericItem(Material.BLACK_STAINED_GLASS_PANE, " ");
-        ItemStack grey = configureGenericItem(Material.GRAY_STAINED_GLASS_PANE, " ");
+        ItemStack black = configureGenericItem(XMaterial.BLACK_STAINED_GLASS_PANE, " ");
+        ItemStack grey = configureGenericItem(XMaterial.GRAY_STAINED_GLASS_PANE, " ");
 
         setItemsPositions(black, grey, back, richers, total, lastUpdated);
     }
 
     private ItemStack configureLastUpdated() {
-        ItemStack lastUpdated = new ItemStack(Material.CLOCK);
-        ItemMeta lastUpdatedMeta = lastUpdated.getItemMeta();
+        ItemStack lastUpdated = XMaterial.CLOCK.parseItem(true);
+        ItemMeta lastUpdatedMeta = Objects.requireNonNull(lastUpdated).getItemMeta();
         lastUpdatedMeta.setDisplayName(config.getRankingMenuLastUpdatedItemName());
         List<String> lastUpdateLore = new ArrayList<>();
         for (String s : config.getRankingMenuLastUpdatedItemLore()) {
@@ -155,7 +157,10 @@ public class Ranking {
     }
 
     private ItemStack configureTotalInvestmentsItem() {
-        ItemStack total = new ItemStack(Material.SUNFLOWER);
+        ItemStack total = XMaterial.SUNFLOWER.parseItem(true);
+        if (total == null) {
+            total = new ItemStack(STONE);
+        }
         ItemMeta totalMeta = total.getItemMeta();
         totalMeta.setDisplayName(config.getRankingMenuTotalInvestmentsItemName());
         List<String> totalLore = new ArrayList<>();
@@ -176,8 +181,11 @@ public class Ranking {
      * @param name
      * @return the item
      */
-    private ItemStack configureGenericItem(Material material, String name) {
-        ItemStack stack = new ItemStack(material);
+    private ItemStack configureGenericItem(XMaterial material, String name) {
+        ItemStack stack = material.parseItem(true);
+        if (stack == null) {
+            stack = new ItemStack(STONE);
+        }
         ItemMeta meta = stack.getItemMeta();
         meta.setDisplayName(name);
         stack.setItemMeta(meta);
@@ -191,7 +199,10 @@ public class Ranking {
      * @return the back button
      */
     private ItemStack configureBackButton() {
-        ItemStack back = new ItemStack(Material.ARROW);
+        ItemStack back = XMaterial.ARROW.parseItem(true);
+        if (back == null) {
+            back = new ItemStack(STONE);
+        }
         ItemMeta meta = back.getItemMeta();
         meta.setDisplayName(config.getRankingMenuBackButton());
         back.setItemMeta(meta);

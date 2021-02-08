@@ -11,6 +11,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.UUID;
+
+import com.cryptomorin.xseries.XMaterial;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
@@ -23,6 +25,7 @@ import net.epconsortium.cryptomarket.finances.ExchangeRate;
 import net.epconsortium.cryptomarket.finances.ExchangeRates;
 import net.epconsortium.cryptomarket.util.Configuration;
 import net.epconsortium.cryptomarket.util.Formatter;
+
 import static net.epconsortium.cryptomarket.CryptoMarket.debug;
 
 /**
@@ -107,7 +110,7 @@ public class Calendar {
      */
     private void cleanInventory() {
         int index = 18;
-        ItemStack air = new ItemStack(Material.AIR, 1);
+        ItemStack air = new ItemStack(Objects.requireNonNull(XMaterial.AIR.parseMaterial()), 1);
         for (int i = index; i < (index + 31); i++) {
             inventory.setItem(i, air);
         }
@@ -119,7 +122,7 @@ public class Calendar {
     private void loadValues() {
         debug("Loading values for period: " + period);
         cleanInventory();
-        ItemStack day = new ItemStack(Material.GRAY_STAINED_GLASS_PANE, 1);
+        ItemStack day = XMaterial.GRAY_STAINED_GLASS_PANE.parseItem();
 
         ItemStack periodItem = configurePeriodItem(period.toString());
         inventory.setItem(6, periodItem);
@@ -160,7 +163,6 @@ public class Calendar {
     /**
      * Configures the lore of item Day
      *
-     * @param cotacao
      * @param meta
      * @param itemStack
      */
@@ -208,17 +210,17 @@ public class Calendar {
      * Configures the inventory
      */
     private void configureInventory() {
-        ItemStack back = configureGenericItem(Material.ARROW,
+        ItemStack back = configureGenericItem(XMaterial.ARROW,
                 config.getCalendarMenuBackButtonName());
-        ItemStack nextMonth = configureGenericItem(Material.OAK_BUTTON,
+        ItemStack nextMonth = configureGenericItem(XMaterial.OAK_BUTTON,
                 config.getCalendarMenuNextMonthButtonName());
-        ItemStack previousMonth = configureGenericItem(Material.OAK_BUTTON,
+        ItemStack previousMonth = configureGenericItem(XMaterial.OAK_BUTTON,
                 config.getCalendarMenuPreviousMonthButtonName());
         ItemStack periodItem = configurePeriodItem(period.toString());
         ItemStack blackGlass = configureGenericItem(
-                Material.BLACK_STAINED_GLASS_PANE, " ");
+                XMaterial.BLACK_STAINED_GLASS_PANE, " ");
         ItemStack greyGlass = configureGenericItem(
-                Material.GRAY_STAINED_GLASS_PANE, " ");
+                XMaterial.GRAY_STAINED_GLASS_PANE, " ");
         setButtonsPositions(back, nextMonth, previousMonth, periodItem,
                 blackGlass, greyGlass);
     }
@@ -230,7 +232,7 @@ public class Calendar {
      * @return Period item
      */
     private ItemStack configurePeriodItem(String date) {
-        ItemStack item = new ItemStack(Material.FILLED_MAP);
+        ItemStack item = new ItemStack(Objects.requireNonNull(XMaterial.FILLED_MAP.parseMaterial(true)));
         ItemMeta meta = item.getItemMeta();
         meta.setDisplayName(date);
         item.setItemMeta(meta);
@@ -244,8 +246,11 @@ public class Calendar {
      * @param name name
      * @return the item
      */
-    private ItemStack configureGenericItem(Material material, String name) {
-        ItemStack stack = new ItemStack(material);
+    private ItemStack configureGenericItem(XMaterial material, String name) {
+        ItemStack stack = material.parseItem();
+        if (stack == null) {
+            stack = new ItemStack(Material.STONE);
+        }
         ItemMeta meta = stack.getItemMeta();
         meta.setDisplayName(name);
         stack.setItemMeta(meta);
