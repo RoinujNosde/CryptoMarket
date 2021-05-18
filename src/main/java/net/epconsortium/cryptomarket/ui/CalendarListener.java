@@ -28,10 +28,6 @@ public class CalendarListener implements Listener {
     public void onInventoryClickEvent(InventoryClickEvent event) {
         Player player = (Player) event.getWhoClicked();
 
-        if (!Helper.isCustomInventory(event)) {
-            return;
-        }
-
         if (event.getView().getTitle().equals(
                 config.getCalendarMenuName())) {
             event.setCancelled(true);

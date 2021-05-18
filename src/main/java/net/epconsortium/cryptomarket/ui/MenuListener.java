@@ -4,6 +4,7 @@ import net.epconsortium.cryptomarket.CryptoMarket;
 import net.epconsortium.cryptomarket.conversation.NegotiationConversation;
 import net.epconsortium.cryptomarket.finances.ExchangeRates;
 import net.epconsortium.cryptomarket.finances.Negotiation;
+import net.epconsortium.cryptomarket.ui.frames.RankingFrame;
 import net.epconsortium.cryptomarket.util.Configuration;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -12,6 +13,7 @@ import org.bukkit.event.inventory.InventoryClickEvent;
 
 import java.text.MessageFormat;
 import java.util.Objects;
+import java.util.concurrent.ExecutionException;
 
 /**
  * Class used to listen to clicks on the Menu menu and process them
@@ -31,10 +33,6 @@ public class MenuListener implements Listener {
     @EventHandler
     public void onInventoryClick(InventoryClickEvent event) {
         Player player = (Player) event.getWhoClicked();
-
-        if (!Helper.isCustomInventory(event)) {
-            return;
-        }
 
         if (event.getView().getTitle().equals(config.getMenuName())) {
             event.setCancelled(true);
@@ -59,8 +57,8 @@ public class MenuListener implements Listener {
                 player.closeInventory();
                 return true;
             }
-            if (ExchangeRates.errorOcurred()) {
-                ExchangeRates er = new ExchangeRates(plugin);
+            if (ExchangeRates.errorOccurred()) {
+                ExchangeRates er = plugin.getExchangeRates();
                 er.updateAll();
                 player.closeInventory();
 
@@ -112,8 +110,13 @@ public class MenuListener implements Listener {
                 player.closeInventory();
                 return true;
             }
-            Ranking ranking = new Ranking(plugin, player);
-            ranking.open();
+            //todo trocar parent para o MenuFrame
+            try {
+                InventoryDrawer.getInstance().open(new RankingFrame(null, player));
+            } catch (ExecutionException | InterruptedException e) {
+                player.sendMessage(config.getMessageErrorAccessingRankingData());
+                e.printStackTrace();
+            }
             return true;
         }
         return false;

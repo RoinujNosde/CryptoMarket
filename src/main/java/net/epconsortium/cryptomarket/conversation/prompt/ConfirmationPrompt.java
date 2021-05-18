@@ -27,16 +27,14 @@ public class ConfirmationPrompt extends FixedSetPrompt {
     }
 
     @Override
-    protected Prompt acceptValidatedInput(ConversationContext context,
-            String s) {
+    protected Prompt acceptValidatedInput(ConversationContext context, String s) {
         if (s.equals(cancel)) {
             return END_OF_CONVERSATION;
         }
 
         CryptoMarket plugin = (CryptoMarket) context.getPlugin();
         String coin = (String) context.getSessionData("coin");
-        Economy economy = new Economy(plugin, coin);
-
+        Economy economy = plugin.getEconomy();
         Investor investor = (Investor) context.getSessionData("investor");
         
         BigDecimal value = (BigDecimal) context.getSessionData("amount");
@@ -44,12 +42,12 @@ public class ConfirmationPrompt extends FixedSetPrompt {
         Negotiation negotiation = getNegotiation(context);
         switch (negotiation) {
             case PURCHASE:
-                if (!economy.buy(investor, value)) {
+                if (!economy.buy(coin, investor, value)) {
                     return new ErrorPrompt();
                 }
                 break;
             case SELL:
-                if (!economy.sell(investor, value)) {
+                if (!economy.sell(coin, investor, value)) {
                     return new ErrorPrompt();
                 }
                 break;
@@ -62,7 +60,6 @@ public class ConfirmationPrompt extends FixedSetPrompt {
     public String getPromptText(ConversationContext context) {
         CryptoMarket plugin = (CryptoMarket) context.getPlugin();
         String coin = (String) context.getSessionData("coin");
-        Economy economy = new Economy(plugin, coin);
         Configuration config = new Configuration(plugin);
         String message = config.getMessageNegotiationConfirmation();
         String action = null;
@@ -78,10 +75,9 @@ public class ConfirmationPrompt extends FixedSetPrompt {
         }
 
         BigDecimal amount = ((BigDecimal) context.getSessionData("amount"));
-        BigDecimal value = economy.convert(amount);
+        BigDecimal value = plugin.getEconomy().convert(coin, amount);
 
-        return MessageFormat.format(message, action, amount, coin, value) +
-                " " + formatFixedSet();
+        return MessageFormat.format(message, action, amount, coin, value) + " " + formatFixedSet();
     }
 
     private Negotiation getNegotiation(ConversationContext context) {

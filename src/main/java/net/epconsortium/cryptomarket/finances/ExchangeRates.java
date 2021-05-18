@@ -6,6 +6,8 @@ import com.google.gson.JsonObject;
 import net.epconsortium.cryptomarket.CryptoMarket;
 import net.epconsortium.cryptomarket.util.Configuration;
 import org.bukkit.scheduler.BukkitRunnable;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -25,6 +27,7 @@ import static net.epconsortium.cryptomarket.CryptoMarket.warn;
  */
 public class ExchangeRates {
 
+    private static ExchangeRates instance;
     private final CryptoMarket plugin;
     private final Configuration config;
 
@@ -36,16 +39,23 @@ public class ExchangeRates {
     private static boolean dailyError;
     private static boolean currentError;
 
-    public ExchangeRates(CryptoMarket plugin) {
+    private ExchangeRates(CryptoMarket plugin) {
         this.plugin = Objects.requireNonNull(plugin);
         config = new Configuration(plugin);
+    }
+
+    public static ExchangeRates getInstance(@NotNull CryptoMarket plugin) {
+        if (instance == null) {
+            instance = new ExchangeRates(plugin);
+        }
+        return instance;
     }
 
     /**
      * Updates all exchange rates and allocates them on memory
      */
     public void updateAll() {
-        //Reseting the errors
+        //Resetting the errors
         setCurrentError(false);
         setDailyError(false);
         //Updating
@@ -65,16 +75,12 @@ public class ExchangeRates {
                 for (String coin : config.getCoins()) {
                     awaitServerLimit();
                     try {
-                        HttpURLConnection connection
-                                = openHttpConnection(getExchangeRateUrl(coin));
-
+                        HttpURLConnection connection = openHttpConnection(getExchangeRateUrl(coin));
                         int responseCode = connection.getResponseCode();
                         if (responseCode >= 200 && responseCode <= 299) {
                             JsonObject json = extractJsonFrom(connection);
 
-                            BigDecimal exchangeRate = json
-                                    .get("Realtime Currency Exchange Rate")
-                                    .getAsJsonObject()
+                            BigDecimal exchangeRate = json.get("Realtime Currency Exchange Rate").getAsJsonObject()
                                     .get("5. Exchange Rate").getAsBigDecimal();
 
                             LocalDate date = LocalDate.now();
@@ -89,8 +95,8 @@ public class ExchangeRates {
                             error = true;
                         }
                     } catch (Exception e) {
-                        warn("Error updating the coins values. "
-                                + "Wait a few minutes and try again!");
+                        warn("Error updating the coins values. Wait a few minutes and try again!");
+                        e.printStackTrace();
                         error = true;
                     }
                 }
@@ -118,20 +124,13 @@ public class ExchangeRates {
                         if (responseCode >= 200 && responseCode <= 299) {
                             JsonObject json = extractJsonFrom(connection);
 
-                            JsonObject jo = json.getAsJsonObject(
-                                    "Time Series (Digital Currency Daily)");
-                            Set<Map.Entry<String, JsonElement>> entries
-                                    = jo.entrySet();
+                            JsonObject jo = json.getAsJsonObject("Time Series (Digital Currency Daily)");
+                            Set<Map.Entry<String, JsonElement>> entries = jo.entrySet();
 
                             entries.forEach(entry -> {
-                                LocalDate date
-                                        = LocalDate.parse(entry.getKey());
-                                BigDecimal value = entry.getValue()
-                                        .getAsJsonObject()
-                                        .get("4a. close ("
-                                                + config.getPhysicalCurrency()
-                                                + ")")
-                                        .getAsBigDecimal();
+                                LocalDate date = LocalDate.parse(entry.getKey());
+                                BigDecimal value = entry.getValue().getAsJsonObject().get("4a. close ("
+                                        + config.getPhysicalCurrency() + ")").getAsBigDecimal();
                                 ExchangeRate er = getExchangeRate(date);
                                 if (er == null) {
                                     er = new ExchangeRate();
@@ -143,8 +142,8 @@ public class ExchangeRates {
                             errors.put(coin, true);
                         }
                     } catch (Exception ex) {
-                        warn("Error updating the coins values. "
-                                + "Wait a few minutes and try again!");
+                        warn("Error updating the coins values. Wait a few minutes and try again!");
+                        ex.printStackTrace();
                         errors.put(coin, true);
                     }
                 }
@@ -163,14 +162,10 @@ public class ExchangeRates {
      *
      * @param coin coin
      * @return the URL
-     * @throws MalformedURLException
      */
     private URL getExchangeRateUrl(String coin) throws MalformedURLException {
-        URL url = new URL("https://www.alphavantage.co/query?function="
-                + "CURRENCY_EXCHANGE_RATE&from_currency=" + coin
-                + "&to_currency=" + config.getPhysicalCurrency()
-                + "&apikey=" + config.getApiKey());
-        return url;
+        return new URL("https://www.alphavantage.co/query?function=CURRENCY_EXCHANGE_RATE&from_currency=" + coin
+                + "&to_currency=" + config.getPhysicalCurrency() + "&apikey=" + config.getApiKey());
     }
 
     /**
@@ -178,25 +173,20 @@ public class ExchangeRates {
      *
      * @param coin coin
      * @return the URL
-     * @throws MalformedURLException
      */
     private URL getCurrencyDailyUrl(String coin) throws MalformedURLException {
-        URL url = new URL("https://www.alphavantage.co/query?function="
-                + "DIGITAL_CURRENCY_DAILY&symbol=" + coin + "&market="
-                + config.getPhysicalCurrency() + "&apikey="
-                + config.getApiKey());
-        return url;
+        return new URL("https://www.alphavantage.co/query?function=DIGITAL_CURRENCY_DAILY&symbol=" + coin + "&market="
+                + config.getPhysicalCurrency() + "&apikey=" + config.getApiKey());
     }
 
     /**
      * Returns the Exchange Rate from the date
      *
      * @param date date
-     * @return Exchange Rate, or null if an error ocurred
+     * @return Exchange Rate, or null if an error occurred
      * @throws IllegalArgumentException if date is after today
      */
-    public ExchangeRate getExchangeRate(LocalDate date) throws
-            IllegalArgumentException {
+    public @Nullable ExchangeRate getExchangeRate(LocalDate date) throws IllegalArgumentException {
         Objects.requireNonNull(date);
         final LocalDate now = LocalDate.now();
         if (date.isAfter(now)) {
@@ -236,7 +226,7 @@ public class ExchangeRates {
         } catch (InterruptedException ex) {
             ex.printStackTrace();
         }
-        //Reseting requests count
+        //Resetting requests count
         requests = 1;
     }
 
@@ -245,7 +235,7 @@ public class ExchangeRates {
      *
      * @param connection connection
      * @return json object
-     * @throws IOException if an error ocurred reading the response
+     * @throws IOException if an error occurred reading the response
      */
     private JsonObject extractJsonFrom(HttpURLConnection connection) throws IOException {
         JsonObject json;
@@ -289,27 +279,27 @@ public class ExchangeRates {
     /**
      * Verifies if an error happened during an update
      *
-     * @return true if an error ocurred
+     * @return true if an error occurred
      */
-    public static boolean errorOcurred() {
+    public static boolean errorOccurred() {
         return dailyError || currentError;
     }
 
     /**
-     * Sets if an error ocurred during the daily exchange rate update
+     * Sets if an error occurred during the daily exchange rate update
      * 
-     * @param error true if ocurred
+     * @param error true if occurred
      */
     private void setDailyError(boolean error) {
         dailyError = error;
     }
     
     /**
-     * Sets if an error ocurred during the current exchange rate update
+     * Sets if an error occurred during the current exchange rate update
      * 
-     * @param error true if ocurred
+     * @param error true if occurred
      */
-    private void setCurrentError(boolean error) {
+    private static void setCurrentError(boolean error) {
         currentError = error;
     }
 }

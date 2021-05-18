@@ -41,22 +41,15 @@ public class NegotiationConversation implements ConversationPrefix {
      * Starts the Negotiation Conversation with the Player
      */
     public void start() {
-        new InvestorDao(plugin).getInvestor(player, (investor) -> {
-            new BukkitRunnable() {
-                @Override
-                public void run() {
-                    if (!player.isOnline()) {
-                        return;
-                    }
-                    if (investor == null) {
-                        player.sendMessage(config.
-                                getMessageErrorConnectingToDatabase());
-                        return;
-                    }
-                    createConversation(investor).begin();
-                }
-            }.runTask(plugin);
-        });
+        if (!player.isOnline()) {
+            return;
+        }
+        Investor investor = plugin.getInvestorDao().getInvestor(player);
+        if (investor == null) {
+            player.sendMessage(config.getMessageErrorConnectingToDatabase());
+            return;
+        }
+        createConversation(investor).begin();
     }
 
     /**

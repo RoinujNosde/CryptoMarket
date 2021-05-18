@@ -1,12 +1,12 @@
 package net.epconsortium.cryptomarket.database.dao;
 
+import net.epconsortium.cryptomarket.finances.ExchangeRate;
 import org.bukkit.OfflinePlayer;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.math.BigDecimal;
-import java.util.Collections;
-import java.util.Map;
-import java.util.Objects;
-import java.util.UUID;
+import java.util.*;
 
 /**
  * Class representing an Investor
@@ -26,7 +26,7 @@ public class Investor {
     /**
      * Returns the OfflinePlayer linked to the Investor
      * 
-     * @return offlineplayer
+     * @return the {@link OfflinePlayer}
      */
     public OfflinePlayer getPlayer() {
         return player;
@@ -48,6 +48,32 @@ public class Investor {
         return balance;
     }
 
+    /**
+     * Converts this Investor's balance in cryptocoins to the server's currency
+     *
+     * @param rate the {@link ExchangeRate} used to calculate the patrimony
+     * @return the converted patrimony or -1 if the rate is null
+     */
+    public BigDecimal getConvertedPatrimony(@Nullable ExchangeRate rate) {
+        if (rate == null) {
+            return new BigDecimal(-1);
+        }
+        BigDecimal patrimony = BigDecimal.ZERO;
+        for (Map.Entry<String, Balance> entry : getBalances().entrySet()) {
+            patrimony = patrimony.add(rate.getCoinValue(entry.getKey()).multiply(entry.getValue().getValue()));
+        }
+
+        return patrimony;
+    }
+
+    public static Comparator<Investor> comparator(@NotNull ExchangeRate exchangeRate) {
+        return (o1, o2) -> o1.compareTo(o2, exchangeRate);
+    }
+
+    public int compareTo(@NotNull Investor other, @NotNull ExchangeRate rate) {
+        return getConvertedPatrimony(rate).compareTo(other.getConvertedPatrimony(rate));
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -55,12 +81,12 @@ public class Investor {
 
         Investor that = (Investor) o;
 
-        return player.equals(that.player);
+        return player.getUniqueId().equals(that.player.getUniqueId());
     }
 
     @Override
     public int hashCode() {
-        return player.hashCode();
+        return player.getUniqueId().hashCode();
     }
 
     /**

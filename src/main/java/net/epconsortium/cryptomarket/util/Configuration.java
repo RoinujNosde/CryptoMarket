@@ -145,12 +145,12 @@ public class Configuration {
     }
 
     /**
-     * Returns the richers update interval in milliseconds
+     * Returns the richers update interval in ticks
      *
      * @return the interval
      */
-    public long getIntervalRichersUpdateInMillis() {
-        return getConfig().getInt("richers-update-interval", 15) * 60 * 1000;
+    public long getIntervalRichersUpdateInTicks() {
+        return getConfig().getLong("richers-update-interval", 15) * 60 * 20;
     }
 
     /**
@@ -531,7 +531,7 @@ public class Configuration {
      * @return button name
      */
     public String getButtonCalendarName() {
-        return getColoredString("menu.item.calendar", "Calendar");
+        return getColoredString("menu.items.calendar", "Calendar");
     }
 
     /**

@@ -1,22 +1,18 @@
 package net.epconsortium.cryptomarket;
 
 import net.epconsortium.cryptomarket.commands.CryptoMarketCommand;
+import net.epconsortium.cryptomarket.database.dao.InvestorDao;
+import net.epconsortium.cryptomarket.finances.Economy;
 import net.epconsortium.cryptomarket.finances.ExchangeRates;
+import net.epconsortium.cryptomarket.listeners.PlayerListeners;
+import net.epconsortium.cryptomarket.task.SaveInvestorsTask;
 import net.epconsortium.cryptomarket.task.UpdateExchangeRatesTask;
-import net.epconsortium.cryptomarket.ui.MenuListener;
-import net.milkbowl.vault.economy.Economy;
-import org.bukkit.Bukkit;
+import net.epconsortium.cryptomarket.task.UpdateRichersListTask;
+import net.epconsortium.cryptomarket.ui.InventoryController;
 import org.bukkit.command.PluginCommand;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.RegisteredServiceProvider;
 import org.bukkit.plugin.java.JavaPlugin;
-import org.bukkit.scheduler.BukkitRunnable;
-
-import java.util.logging.Level;
-import net.epconsortium.cryptomarket.database.dao.InvestorDao;
-import net.epconsortium.cryptomarket.task.SaveInvestorsTask;
-import net.epconsortium.cryptomarket.ui.CalendarListener;
-import net.epconsortium.cryptomarket.ui.RankingListener;
 
 /**
  * Main class of the plugin
@@ -26,12 +22,8 @@ import net.epconsortium.cryptomarket.ui.RankingListener;
 public class CryptoMarket extends JavaPlugin {
 
     private static CryptoMarket cm;
-
-    private Economy econ = null;
-    private SaveInvestorsTask saveInvestors;
-    private UpdateExchangeRatesTask updateRates;
-
     private static boolean debug;
+    private net.milkbowl.vault.economy.Economy econ = null;
 
     @Override
     public void onEnable() {
@@ -41,9 +33,8 @@ public class CryptoMarket extends JavaPlugin {
 
         // Eventos
         PluginManager pluginManager = getServer().getPluginManager();
-        pluginManager.registerEvents(new MenuListener(this), this);
-        pluginManager.registerEvents(new CalendarListener(this), this);
-        pluginManager.registerEvents(new RankingListener(this), this);
+        pluginManager.registerEvents(InventoryController.getInstance(), this);
+        pluginManager.registerEvents(new PlayerListeners(this), this);
 
         //Comandos
 		PluginCommand command = getCommand("cryptomarket");
@@ -60,39 +51,28 @@ public class CryptoMarket extends JavaPlugin {
 
         debug = getConfig().getBoolean("debug", false);
 
-        InvestorDao.configureDatabase(this, (success) -> {
-        	new BukkitRunnable() {
-				
-				@Override
-				public void run() {
-		            if (!success) {
-		                getServer().getPluginManager().disablePlugin(CryptoMarket.this);
-		            } else {
-		                getServer().getConsoleSender().sendMessage(
-		                        "[CryptoMarket] Database configured successfuly!");
-		                
-		                ExchangeRates rates = new ExchangeRates(CryptoMarket.this);
-		                rates.updateAll();
-		                
-		                updateRates = new UpdateExchangeRatesTask(rates);
-		                updateRates.start(CryptoMarket.this);
-		                
-		                saveInvestors = new SaveInvestorsTask(CryptoMarket.this);
-		                saveInvestors.start();
-		            }					
-				}
-			}.runTask(this);
+        getInvestorDao().configureDatabase(this, (success) -> {
+            if (!success) {
+                getServer().getPluginManager().disablePlugin(this);
+            } else {
+                getLogger().info("Database configured successfuly!");
 
+                getExchangeRates().updateAll();
+                startTasks();
+            }
         });
+    }
+
+    private void startTasks() {
+        new UpdateExchangeRatesTask(this).start();
+        new SaveInvestorsTask(this).start();
+        new UpdateRichersListTask(this).start();
     }
 
     @Override
     public void onDisable() {
-    	if (saveInvestors == null || updateRates == null) return;
-    	
-        new InvestorDao(this).saveAll();
-        saveInvestors.cancel();
-        updateRates.cancel();
+    	getServer().getScheduler().cancelTasks(this);
+        getInvestorDao().saveAll();
     }
 
     /**
@@ -102,7 +82,7 @@ public class CryptoMarket extends JavaPlugin {
      */
     public static void debug(String message) {
         if (debug) {
-            Bukkit.getServer().getLogger().log(Level.INFO, "[CryptoMarket] {0}", message);
+            getInstance().getLogger().info(message);
         }
     }
 
@@ -112,7 +92,7 @@ public class CryptoMarket extends JavaPlugin {
      * @param message message
      */
     public static void warn(String message) {
-        Bukkit.getServer().getLogger().log(Level.WARNING, "[CryptoMarket] {0}", message);
+        getInstance().getLogger().warning(message);
     }
 
     /**
@@ -124,8 +104,8 @@ public class CryptoMarket extends JavaPlugin {
         if (getServer().getPluginManager().getPlugin("Vault") == null) {
             return false;
         }
-        RegisteredServiceProvider<Economy> rsp = getServer()
-                .getServicesManager().getRegistration(Economy.class);
+        RegisteredServiceProvider<net.milkbowl.vault.economy.Economy> rsp = getServer()
+                .getServicesManager().getRegistration(net.milkbowl.vault.economy.Economy.class);
         if (rsp == null) {
             return false;
         }
@@ -133,13 +113,25 @@ public class CryptoMarket extends JavaPlugin {
         return econ != null;
     }
 
+    public InvestorDao getInvestorDao() {
+        return InvestorDao.getInstance(this);
+    }
+
+    public ExchangeRates getExchangeRates() {
+        return ExchangeRates.getInstance(this);
+    }
+
     /**
      * Returns Vault's Economy
      *
      * @return economy
      */
-    public Economy getEconomy() {
+    public net.milkbowl.vault.economy.Economy getVaultEconomy() {
         return econ;
+    }
+
+    public Economy getEconomy() {
+        return Economy.getInstance(this);
     }
 
     /**
@@ -147,7 +139,7 @@ public class CryptoMarket extends JavaPlugin {
      *
      * @return the instance
      */
-    public static CryptoMarket getCryptoMarket() {
+    public static CryptoMarket getInstance() {
         return cm;
     }
 }

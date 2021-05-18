@@ -20,10 +20,9 @@ public class AmountPrompt extends NumericPrompt {
         CryptoMarket plugin = (CryptoMarket) context.getPlugin();
         Configuration config = new Configuration(plugin);
         String coin = ((String) context.getSessionData("coin"));
-        Economy economia = new Economy(plugin, coin);
         BigDecimal amount = new BigDecimal(number.toString());
 
-        if (economia.convert(amount).doubleValue() < 0) {
+        if (plugin.getEconomy().convert(coin, amount).doubleValue() < 0) {
             return new OutdatedDataPrompt();
         }
         context.setSessionData("amount", amount);

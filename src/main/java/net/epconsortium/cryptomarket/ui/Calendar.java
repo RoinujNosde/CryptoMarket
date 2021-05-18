@@ -143,8 +143,7 @@ public class Calendar {
                 lore.add(config.getCalendarMenuNoExchangeRate());
                 dayMeta.setLore(lore);
             } else {
-                ExchangeRates rates = new ExchangeRates(plugin);
-                ExchangeRate er = rates.getExchangeRate(date);
+                ExchangeRate er = plugin.getExchangeRates().getExchangeRate(date);
 
                 if (er == null) {
                     er = new ExchangeRate();

@@ -15,7 +15,7 @@ import net.epconsortium.cryptomarket.database.dao.Investor;
 import org.bukkit.scheduler.BukkitRunnable;
 
 /**
- * This class logs the negociations to a file
+ * This class logs the negotiations to a file
  *
  * @author roinujnosde
  */
@@ -27,10 +27,8 @@ public class Logger {
 
     public Logger(CryptoMarket plugin) {
         this.plugin = Objects.requireNonNull(plugin);
-        logsFolder = new File(plugin.getDataFolder() + File.separator
-                + "logs");
-        file = new File(logsFolder,
-                LocalDate.now() + ".txt");
+        logsFolder = new File(plugin.getDataFolder() + File.separator + "logs");
+        file = new File(logsFolder, LocalDate.now() + ".txt");
     }
 
     /**
@@ -42,8 +40,7 @@ public class Logger {
      * @param coin
      * @param vaultValue
      */
-    public void log(Investor investor, Negotiation negotiation,
-            BigDecimal cryptoValue, String coin, double vaultValue) {
+    public void log(Investor investor, Negotiation negotiation, BigDecimal cryptoValue, String coin, double vaultValue) {
         new BukkitRunnable() {
             @Override
             public void run() {
@@ -63,7 +60,7 @@ public class Logger {
                         writer.flush();
                     }
                 } catch (IOException ex) {
-                    CryptoMarket.warn("Error logging a negociation to file!");
+                    CryptoMarket.warn("Error logging a negotiation to file!");
                     ex.printStackTrace();
                 }
             }
