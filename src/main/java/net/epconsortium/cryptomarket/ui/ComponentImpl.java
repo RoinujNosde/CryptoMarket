@@ -104,6 +104,11 @@ public class ComponentImpl extends Component {
             return this;
         }
 
+        public Builder withAmount(int amount) {
+            component.item.setAmount(amount);
+            return this;
+        }
+
         public Component build() {
             ItemMeta itemMeta = component.getItemMeta();
             if (itemMeta != null) {

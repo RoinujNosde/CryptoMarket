@@ -1,19 +1,21 @@
 package net.epconsortium.cryptomarket.ui.frames;
 
 import com.cryptomorin.xseries.XMaterial;
+import net.epconsortium.cryptomarket.conversation.NegotiationConversation;
 import net.epconsortium.cryptomarket.database.dao.Investor;
 import net.epconsortium.cryptomarket.finances.ExchangeRate;
 import net.epconsortium.cryptomarket.finances.ExchangeRates;
+import net.epconsortium.cryptomarket.finances.Negotiation;
 import net.epconsortium.cryptomarket.ui.Component;
 import net.epconsortium.cryptomarket.ui.ComponentImpl;
 import net.epconsortium.cryptomarket.ui.ComponentImpl.Builder;
 import net.epconsortium.cryptomarket.ui.Frame;
+import net.epconsortium.cryptomarket.ui.InventoryDrawer;
 import net.epconsortium.cryptomarket.util.Formatter;
-import org.bukkit.Material;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
+import org.bukkit.event.inventory.ClickType;
 import org.bukkit.inventory.ItemFlag;
-import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -23,11 +25,10 @@ import java.text.MessageFormat;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
-import static com.cryptomorin.xseries.XMaterial.BLACK_STAINED_GLASS_PANE;
-import static com.cryptomorin.xseries.XMaterial.GRAY_STAINED_GLASS_PANE;
+import static com.cryptomorin.xseries.XMaterial.*;
 import static net.epconsortium.cryptomarket.ui.Components.addPanels;
-import static net.epconsortium.cryptomarket.ui.Components.generic;
 
 public class MenuFrame extends Frame {
     private final Investor investor;
@@ -55,9 +56,39 @@ public class MenuFrame extends Frame {
         add(coins());
         add(wallet());
         add(ranking());
-        add(generic(XMaterial.FILLED_MAP, configuration.getButtonCalendarName(), 25));
-        add(generic(XMaterial.STRUCTURE_VOID, configuration.getButtonUpdateName(), 43));
+        add(calendar());
+        add(update());
         addGlasses();
+    }
+
+    @NotNull
+    private Component update() {
+        ComponentImpl update = new ComponentImpl(configuration.getButtonUpdateName(), null, STRUCTURE_VOID, 43);
+        update.setPermission(ClickType.LEFT, "cryptomarket.update");
+        update.setListener(ClickType.LEFT, () -> {
+            if (ExchangeRates.errorOccurred()) {
+                ExchangeRates er = plugin.getExchangeRates();
+                er.updateAll();
+                getViewer().closeInventory();
+
+                String msg = configuration.getMessageUpdatingContent();
+                msg = MessageFormat.format(msg, er.getMinutesToUpdate());
+                getViewer().sendMessage(msg);
+            } else {
+                getViewer().sendMessage(configuration.getMessageContentAlreadyUptodate());
+                getViewer().closeInventory();
+            }
+        });
+        return update;
+    }
+
+    @NotNull
+    private Component calendar() {
+        ComponentImpl calendar = new ComponentImpl(configuration.getCalendarMenuBackButtonName(), null, FILLED_MAP, 25);
+        calendar.setPermission(ClickType.LEFT, "cryptomarket.calendar");
+        calendar.setListener(ClickType.LEFT, () ->
+                InventoryDrawer.getInstance().open(new CalendarFrame(this, getViewer())));
+        return calendar;
     }
 
     private void addGlasses() {
@@ -115,18 +146,24 @@ public class MenuFrame extends Frame {
     }
 
     private Component coins() {
-        ItemStack coins = XMaterial.SUNFLOWER.parseItem(true);
-        if (coins == null) {
-            coins = new ItemStack(Material.STONE);
-        }
+        Component coins = new ComponentImpl(configuration.getButtonCoinsName(), getCoinsLore(), SUNFLOWER, 12);
 
-        ItemMeta meta = coins.getItemMeta();
+        ItemMeta meta = Objects.requireNonNull(coins.getItemMeta());
         meta.addEnchant(Enchantment.ARROW_DAMAGE, 1, false);
         meta.addItemFlags(ItemFlag.HIDE_ENCHANTS);
-        meta.setDisplayName(configuration.getButtonCoinsName());
-
         coins.setItemMeta(meta);
-        return new ComponentImpl(configuration.getButtonCoinsName(), getCoinsLore(), coins, 12);
+
+        getViewer().closeInventory();
+        coins.setPermission(ClickType.RIGHT, "cryptomarket.negotiate");
+        coins.setListener(ClickType.RIGHT, () -> {
+            new NegotiationConversation(plugin, Negotiation.PURCHASE, getViewer()).start();
+        });
+        coins.setPermission(ClickType.LEFT, "cryptomarket.negotiate");
+        coins.setListener(ClickType.LEFT, () -> {
+            new NegotiationConversation(plugin, Negotiation.SELL, getViewer()).start();
+        });
+
+        return coins;
     }
 
     private List<String> getWalletLore() {
@@ -206,7 +243,19 @@ public class MenuFrame extends Frame {
     }
 
     private Component ranking() {
-        return new Builder(XMaterial.PLAYER_HEAD).withDisplayName(configuration.getButtonRankingName()).withSlot(37)
-                .build();
+        Component component = new Builder(PLAYER_HEAD).withDisplayName(configuration.getButtonRankingName())
+                .withSlot(37).build();
+        component.setPermission(ClickType.LEFT, "cryptomarket.ranking");
+        component.setListener(ClickType.LEFT, () -> {
+            ExchangeRate exchangeRate = plugin.getExchangeRates().getExchangeRate(LocalDate.now());
+            if (exchangeRate == null) {
+                getViewer().sendMessage(configuration.getMessageErrorAccessingRankingData());
+                getViewer().closeInventory();
+                return;
+            }
+            InventoryDrawer.getInstance().open(new RankingFrame(this, getViewer(), exchangeRate));
+        });
+        return component;
     }
+
 }

@@ -1,16 +1,16 @@
 package net.epconsortium.cryptomarket.ui.frames;
 
 import com.cryptomorin.xseries.XMaterial;
-import net.epconsortium.cryptomarket.CryptoMarket;
 import net.epconsortium.cryptomarket.database.dao.Investor;
 import net.epconsortium.cryptomarket.finances.Economy;
 import net.epconsortium.cryptomarket.finances.ExchangeRate;
 import net.epconsortium.cryptomarket.ui.Component;
 import net.epconsortium.cryptomarket.ui.ComponentImpl;
 import net.epconsortium.cryptomarket.ui.Frame;
-import net.epconsortium.cryptomarket.util.Configuration;
+import net.epconsortium.cryptomarket.ui.InventoryDrawer;
 import net.epconsortium.cryptomarket.util.Formatter;
 import org.bukkit.entity.Player;
+import org.bukkit.event.inventory.ClickType;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.meta.SkullMeta;
@@ -19,28 +19,25 @@ import org.jetbrains.annotations.Nullable;
 
 import java.math.BigDecimal;
 import java.text.MessageFormat;
-import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.time.format.FormatStyle;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
-import java.util.concurrent.ExecutionException;
 
 import static com.cryptomorin.xseries.XMaterial.*;
 import static net.epconsortium.cryptomarket.ui.Components.addPanels;
 
 public class RankingFrame extends Frame {
-    private final CryptoMarket plugin = CryptoMarket.getInstance();
 
     private final Economy econ;
     private final List<Investor> richersList;
     private final double totalInvestments;
-    private final Configuration config;
+    private final ExchangeRate exchangeRate;
 
-    public RankingFrame(@Nullable Frame parent, @NotNull Player viewer) throws ExecutionException, InterruptedException {
+    public RankingFrame(@Nullable Frame parent, @NotNull Player viewer, @NotNull ExchangeRate exchangeRate) {
         super(parent, viewer);
-        config = new Configuration(plugin);
+        this.exchangeRate = exchangeRate;
         econ = plugin.getEconomy();
         richersList = econ.getTopInvestors(5);
         totalInvestments = econ.getTotalInvestments();
@@ -67,12 +64,6 @@ public class RankingFrame extends Frame {
         }
     }
 
-    /**
-     * Configures the Richer on the index
-     *
-     * @param index index
-     * @return the Richer item
-     */
     private Component richer(int index, int slot) {
         ItemStack head = XMaterial.PLAYER_HEAD.parseItem(true);
         ItemMeta meta = Objects.requireNonNull(head).getItemMeta();
@@ -81,16 +72,15 @@ public class RankingFrame extends Frame {
         String displayName;
         ArrayList<String> lore = new ArrayList<>();
         if (index >= richersList.size()) {
-            displayName = MessageFormat.format(config.getRankingMenuNoRicherLore(), rank);
+            displayName = MessageFormat.format(configuration.getRankingMenuNoRicherLore(), rank);
             head.setItemMeta(meta);
         } else {
             Investor richer = richersList.get(index);
             SkullMeta skullMeta = (SkullMeta) head.getItemMeta();
             skullMeta.setOwner(richer.getPlayer().getName());
-            displayName = MessageFormat.format(config.getRankingMenuRicherItemName(), rank, richer.getPlayer().getName());
+            displayName = MessageFormat.format(configuration.getRankingMenuRicherItemName(), rank, richer.getPlayer().getName());
 
-            List<String> configLore = config.getRankingMenuRicherItemLore();
-            ExchangeRate exchangeRate = plugin.getExchangeRates().getExchangeRate(LocalDate.now());
+            List<String> configLore = configuration.getRankingMenuRicherItemLore();
             BigDecimal patrimony = richer.getConvertedPatrimony(exchangeRate);
             double percentage = 0;
             if (totalInvestments > 0) {
@@ -108,29 +98,26 @@ public class RankingFrame extends Frame {
 
     private Component lastUpdated() {
         List<String> lastUpdateLore = new ArrayList<>();
-        for (String s : config.getRankingMenuLastUpdatedItemLore()) {
+        for (String s : configuration.getRankingMenuLastUpdatedItemLore()) {
             lastUpdateLore.add(MessageFormat.format(s,
                     econ.getRichersLastUpdate().format(DateTimeFormatter.ofLocalizedDateTime(FormatStyle.SHORT))));
         }
-        return new ComponentImpl(config.getRankingMenuLastUpdatedItemName(), lastUpdateLore, CLOCK, 38);
+        return new ComponentImpl(configuration.getRankingMenuLastUpdatedItemName(), lastUpdateLore, CLOCK, 38);
     }
 
     private Component totalInvestments() {
         List<String> totalLore = new ArrayList<>();
-        for (String s : config.getRankingMenuTotalInvestmentsItemLore()) {
+        for (String s : configuration.getRankingMenuTotalInvestmentsItemLore()) {
             totalLore.add(MessageFormat.format(s, Formatter.formatServerCurrency(totalInvestments)));
         }
 
-        return new ComponentImpl(config.getRankingMenuTotalInvestmentsItemName(), totalLore, XMaterial.SUNFLOWER, 36);
+        return new ComponentImpl(configuration.getRankingMenuTotalInvestmentsItemName(), totalLore, XMaterial.SUNFLOWER, 36);
     }
 
-    /**
-     * Configures the Back button
-     *
-     * @return the back button
-     */
     private Component backButton() {
-        return new ComponentImpl(config.getRankingMenuBackButton(), null, XMaterial.ARROW, 4);
+        ComponentImpl component = new ComponentImpl(configuration.getRankingMenuBackButton(), null, ARROW, 4);
+        component.setListener(ClickType.LEFT, () -> InventoryDrawer.getInstance().open(getParent()));
+        return component;
     }
 
     private void addGlasses() {
