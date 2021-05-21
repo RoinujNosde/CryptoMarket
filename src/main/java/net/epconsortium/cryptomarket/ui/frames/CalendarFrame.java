@@ -64,6 +64,7 @@ public class CalendarFrame extends Frame {
      */
     public void previousMonth() {
         period = period.minusMonths(1);
+        InventoryDrawer.getInstance().open(this);
     }
 
     private void addPanels() {

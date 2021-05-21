@@ -84,7 +84,7 @@ public class MenuFrame extends Frame {
 
     @NotNull
     private Component calendar() {
-        ComponentImpl calendar = new ComponentImpl(configuration.getCalendarMenuBackButtonName(), null, FILLED_MAP, 25);
+        ComponentImpl calendar = new ComponentImpl(configuration.getButtonCalendarName(), null, FILLED_MAP, 25);
         calendar.setPermission(ClickType.LEFT, "cryptomarket.calendar");
         calendar.setListener(ClickType.LEFT, () ->
                 InventoryDrawer.getInstance().open(new CalendarFrame(this, getViewer())));
@@ -153,13 +153,14 @@ public class MenuFrame extends Frame {
         meta.addItemFlags(ItemFlag.HIDE_ENCHANTS);
         coins.setItemMeta(meta);
 
-        getViewer().closeInventory();
         coins.setPermission(ClickType.RIGHT, "cryptomarket.negotiate");
         coins.setListener(ClickType.RIGHT, () -> {
+            getViewer().closeInventory();
             new NegotiationConversation(plugin, Negotiation.PURCHASE, getViewer()).start();
         });
         coins.setPermission(ClickType.LEFT, "cryptomarket.negotiate");
         coins.setListener(ClickType.LEFT, () -> {
+            getViewer().closeInventory();
             new NegotiationConversation(plugin, Negotiation.SELL, getViewer()).start();
         });
 
