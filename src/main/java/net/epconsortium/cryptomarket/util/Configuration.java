@@ -132,7 +132,7 @@ public class Configuration {
      * @return the interval
      */
     public long getIntervalSavingInvestorsInTicks() {
-        return getConfig().getInt("saving-interval", 10) * 60 * 20;
+        return getConfig().getLong("saving-interval", 10) * 60 * 20;
     }
 
     /**
@@ -549,7 +549,7 @@ public class Configuration {
      * @return the message
      */
     public String getMessageContentAlreadyUptodate() {
-        return getColoredString("messages.alreay-uptodate",
+        return getColoredString("messages.already-uptodate",
                 "This is not necessary, the content is already up-to-date!");
     }
 
