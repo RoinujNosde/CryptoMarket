@@ -3,6 +3,8 @@ main: net.epconsortium.cryptomarket.CryptoMarket
 version: ${project.version}
 api-version: 1.13
 description: ${project.description}
+softdepend:
+  - PlaceholderAPI
 authors:
 - RoinujNosde
 - ZaHadden

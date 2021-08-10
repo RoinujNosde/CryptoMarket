@@ -9,6 +9,7 @@ import net.epconsortium.cryptomarket.task.SaveInvestorsTask;
 import net.epconsortium.cryptomarket.task.UpdateExchangeRatesTask;
 import net.epconsortium.cryptomarket.task.UpdateRichersListTask;
 import net.epconsortium.cryptomarket.ui.InventoryController;
+import org.bukkit.Bukkit;
 import org.bukkit.command.PluginCommand;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.RegisteredServiceProvider;
@@ -61,6 +62,9 @@ public class CryptoMarket extends JavaPlugin {
                 startTasks();
             }
         });
+        if (Bukkit.getPluginManager().getPlugin("PlaceholderAPI") != null) {
+            new CMExpansion(this).register();
+        }
     }
 
     private void startTasks() {
