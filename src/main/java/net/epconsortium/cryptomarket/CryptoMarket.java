@@ -11,9 +11,12 @@ import net.epconsortium.cryptomarket.task.UpdateRichersListTask;
 import net.epconsortium.cryptomarket.ui.InventoryController;
 import org.bukkit.Bukkit;
 import org.bukkit.command.PluginCommand;
+import org.bukkit.entity.Player;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.RegisteredServiceProvider;
 import org.bukkit.plugin.java.JavaPlugin;
+
+import java.util.Collection;
 
 /**
  * Main class of the plugin
@@ -60,11 +63,16 @@ public class CryptoMarket extends JavaPlugin {
 
                 getExchangeRates().updateAll();
                 startTasks();
+                if (Bukkit.getPluginManager().getPlugin("PlaceholderAPI") != null) {
+                    new CMExpansion(this).register();
+                }
+                Collection<? extends Player> onlinePlayers = getServer().getOnlinePlayers();
+                if (!onlinePlayers.isEmpty()) {
+                    getLogger().info("Found players online (did you reload?), loading their data...");
+                    onlinePlayers.forEach(getInvestorDao()::loadInvestor);
+                }
             }
         });
-        if (Bukkit.getPluginManager().getPlugin("PlaceholderAPI") != null) {
-            new CMExpansion(this).register();
-        }
     }
 
     private void startTasks() {

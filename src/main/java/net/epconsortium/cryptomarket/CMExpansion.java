@@ -65,7 +65,7 @@ public class CMExpansion extends PlaceholderExpansion {
             String coin = priceMatcher.group("coin");
             ExchangeRate exchangeRate = exchangeRates.getExchangeRate(LocalDate.now());
             if (exchangeRate != null) {
-                return Formatter.formatCryptocoin(exchangeRate.getCoinValue(coin.toUpperCase(Locale.ROOT)));
+                return Formatter.formatServerCurrency(exchangeRate.getCoinValue(coin.toUpperCase(Locale.ROOT)));
             }
         }
         Investor investor = investorDao.getInvestor(player);

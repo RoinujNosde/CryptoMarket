@@ -2,6 +2,7 @@ currency code,currency name
 1ST,FirstBlood
 2GIVE,GiveCoin
 808,808Coin
+AAVE,Aave
 ABT,ArcBlock
 ABY,ArtByte
 AC,AsiaCoin
@@ -18,9 +19,11 @@ AID,AidCoin
 AION,Aion
 AIR,AirToken
 AKY,Akuya-Coin
+ALGO,Algorand
 ALIS,ALIS
 AMBER,AmberCoin
 AMP,Synereo
+AMPL,Ampleforth
 ANC,Anoncoin
 ANT,Aragon
 APPC,AppCoins
@@ -31,10 +34,13 @@ ARN,Aeron
 AST,AirSwap
 ATB,ATBCoin
 ATM,ATMChain
+ATOM,Cosmos
 ATS,Authorship
 AUR,Auroracoin
+AVAX,Avalanche
 AVT,Aventus
 B3,B3Coin
+BAND,Band Protocol
 BAT,Basic-Attention-Token
 BAY,BitBay
 BBR,Boolberry
@@ -75,20 +81,25 @@ BQ,bitqy
 BRD,Bread
 BRK,Breakout-Coin
 BRX,Breakout-Stake
+BSV,Bitcoin SV
 BTA,Bata
 BTC,Bitcoin
+BTCB,Bitcoin BEP2
 BTCD,BitcoinDark
 BTCP,Bitcoin-Private
 BTG,Bitcoin-Gold
 BTM,Bitmark
 BTS,BitShares
 BTSR,BTSR
+BTT,BitTorrent
 BTX,Bitcore
 BURST,Burstcoin
+BUSD,Binance-USD
 BUZZ,BuzzCoin
 BYC,Bytecent
 BYTOM,Bytom
 C20,Crypto20
+CAKE,PancakeSwap
 CANN,CannabisCoin
 CAT,BlockCAT
 CCRB,CryptoCarbon
@@ -103,11 +114,13 @@ CMT,CyberMiles
 CND,Cindicator
 CNX,Cryptonex
 COFI,CoinFi
+COMP,Compound
 COSS,COSS
 COVAL,Circuits-Of-Value
 CRBIT,CreditBIT
 CREA,CreativeCoin
 CREDO,Credo
+CRO,Crypto.com Coin
 CRW,Crown
 CSNO,BitDice
 CTR,Centra
@@ -137,6 +150,7 @@ DMT,DMarket
 DNT,district0x
 DOGE,DogeCoin
 DOPE,DopeCoin
+DOT,Polkadot
 DRGN,Dragonchain
 DTA,Data
 DTB,Databits
@@ -150,6 +164,7 @@ EDG,Edgeless
 EDO,Eidoo
 EFL,Electronic-Gulden
 EGC,EverGreenCoin
+EGLD,Elrond
 EKT,EDUCare
 ELA,Elastos
 ELEC,Electrify.Asia
@@ -177,11 +192,13 @@ EVX,Everex
 EXCL,ExclusiveCoin
 EXP,Expanse
 FCT,Factom
+FIL,Filecoin
 FLDC,FoldingCoin
 FLO,FlorinCoin
 FLT,FlutterCoin
 FRST,FirstCoin
 FTC,Feathercoin
+FTT,FTX Token
 FUEL,Etherparty
 FUN,FunFair
 GAM,Gambit
@@ -197,6 +214,7 @@ GNO,Gnosis-Token
 GNT,Golem-Tokens
 GOLOS,Golos
 GRC,Gridcoin
+GRT,Graph
 GRS,Groestlcoin
 GRWI,Growers-International
 GTC,Game
@@ -209,6 +227,7 @@ HEAT,HEAT
 HMQ,Humaniq
 HPB,High-Performance-Blockchain
 HSR,Hshare
+HT,Huobi Token
 HUSH,Hush
 HVN,Hive
 HXX,HexxCoin
@@ -240,12 +259,15 @@ JNT,Jibrel-Network
 KCS,KuCoin
 KICK,KickCoin
 KIN,KIN
+KLAY,Klaytn
 KMD,Komodo
 KNC,Kyber-Network
 KORE,KoreCoin
+KSM,Kusama
 LBC,LBRY-Credits
 LCC,Litecoin-Cash
 LEND,EthLend
+LEO,UNUS SED LEO
 LEV,Leverj
 LGD,Legends-Room
 LINDA,Linda
@@ -258,8 +280,10 @@ LRC,Loopring
 LSK,Lisk
 LTC,Litecoin
 LUN,Lunyr
+LUNA,Terra
 MAID,MaidSafeCoin
 MANA,Decentraland
+MATIC,Polygon
 MAX,Maxcoin
 MBRS,Embers
 MCAP,MCAP
@@ -273,6 +297,7 @@ MGC,MergeCoin
 MGO,MobileGo
 MINEX,Minex
 MINT,Mintcoin
+MIOTA,IOTA
 MITH,Mithril
 MKR,Maker
 MLN,Melon
@@ -387,6 +412,7 @@ RLT,RouletteToken
 RPX,Red-Pulse
 RRT,Recovery-Right-Tokens
 RUFF,Ruff
+RUNE,THORChain
 RUP,Rupee
 RVT,Rivetz
 SAFEX,SafeExchangeCoin
@@ -414,11 +440,13 @@ SNM,SONM
 SNRG,Synergy
 SNT,Status-Network-Token
 SOC,All-Sports
+SOL,Solana
 SOUL,Phantasma
 SPANK,SpankChain
 SPC,SpaceChain
 SPHR,Sphere
 SPR,SpreadCoin
+SNX,Synthetix-Network-Token
 SRN,Sirin-Labs-Token
 START,Startcoin
 STEEM,Steem
@@ -462,16 +490,19 @@ UBQ,Ubiq
 UKG,UnikoinGold
 ULA,Ulatech
 UNB,UnbreakableCoin
+UNI,Uniswap
 UNITY,SuperNET
 UNO,Unobtanium
 UNY,Unity-Ingot
 UP,UpToken
 URO,Uro
 USDT,Tether
+UST,TerraUSD
 UTK,UTrust
 VEE,BLOCKv
 VEN,VeChain
 VERI,Veritaseum
+VET,VeChain
 VIA,Viacoin
 VIB,Viberate
 VIBE,Vibe
@@ -506,6 +537,8 @@ XCP,Counterparty
 XDN,DigitalNote
 XEL,Elastic
 XEM,NEM
+NEM,NEM
+XHV,Haven-Protocol
 XID,Sphere-Identity
 XLM,Stellar
 XMG,Magi
