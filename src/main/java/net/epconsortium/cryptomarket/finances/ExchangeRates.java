@@ -249,9 +249,7 @@ public class ExchangeRates {
                     JsonObject jo = json.getAsJsonObject("Time Series (Digital Currency Daily)");
                     if (jo == null) {
                         plugin.getLogger().warning("API limit exceeded. Wait a few minutes and try again.");
-                        if (json.has("Note")) {
-                            CryptoMarket.debug(json.get("Note").getAsString());
-                        }
+                        CryptoMarket.debug(json.toString());
                         errors.put(coin, true);
                         continue;
                     }
@@ -297,9 +295,7 @@ public class ExchangeRates {
                     JsonElement realtimeCurrencyExchangeRate = json.get("Realtime Currency Exchange Rate");
                     if (realtimeCurrencyExchangeRate == null) {
                         plugin.getLogger().warning("API limit exceeded. Wait a few minutes and try again.");
-                        if (json.has("Note")) {
-                            CryptoMarket.debug(json.get("Note").getAsString());
-                        }
+                        CryptoMarket.debug(json.toString());
                         error = true;
                         continue;
                     }
