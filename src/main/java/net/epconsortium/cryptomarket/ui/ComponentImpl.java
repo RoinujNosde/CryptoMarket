@@ -29,7 +29,7 @@ public class ComponentImpl extends Component {
 
     public ComponentImpl(@Nullable String displayName, @Nullable List<String> lore, @NotNull XMaterial material,
                            int slot) {
-        this(displayName, lore, material.parseItem(true), slot);
+        this(displayName, lore, material.parseItem(), slot);
     }
 
     public ComponentImpl(@Nullable String displayName, @Nullable List<String> lore, @Nullable ItemStack item,
@@ -63,7 +63,7 @@ public class ComponentImpl extends Component {
         private @Nullable List<String> lore;
 
         public Builder(@NotNull XMaterial material) {
-            this(material.parseItem(true));
+            this(material.parseItem());
         }
 
         public Builder(@NotNull Material material) {

@@ -65,7 +65,7 @@ public class RankingFrame extends Frame {
     }
 
     private Component richer(int index, int slot) {
-        ItemStack head = XMaterial.PLAYER_HEAD.parseItem(true);
+        ItemStack head = XMaterial.PLAYER_HEAD.parseItem();
         ItemMeta meta = Objects.requireNonNull(head).getItemMeta();
         int rank = index + 1;
 
