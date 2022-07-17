@@ -1,29 +1,29 @@
 package net.epconsortium.cryptomarket.commands;
 
-import java.math.BigDecimal;
 import net.epconsortium.cryptomarket.CryptoMarket;
 import net.epconsortium.cryptomarket.database.dao.Investor;
+import net.epconsortium.cryptomarket.finances.Economy;
 import net.epconsortium.cryptomarket.finances.ExchangeRate;
 import net.epconsortium.cryptomarket.finances.ExchangeRates;
 import net.epconsortium.cryptomarket.ui.InventoryDrawer;
 import net.epconsortium.cryptomarket.ui.frames.MenuFrame;
 import net.epconsortium.cryptomarket.util.Configuration;
 import net.epconsortium.cryptomarket.util.Formatter;
+import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.TabCompleter;
 import org.bukkit.entity.Player;
+import org.bukkit.scheduler.BukkitRunnable;
 
+import java.math.BigDecimal;
 import java.text.MessageFormat;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
-import net.epconsortium.cryptomarket.finances.Economy;
-import org.bukkit.Bukkit;
-import org.bukkit.scheduler.BukkitRunnable;
 
 /**
  * Class used to process the commands of the plugin
@@ -41,68 +41,72 @@ public class CryptoMarketCommand implements CommandExecutor, TabCompleter {
     }
 
     @Override
-    public boolean onCommand(CommandSender commandSender, Command command,
-            String label, String[] args) {
+    public boolean onCommand(CommandSender commandSender, Command command, String label, String[] args) {
+        final String subCommand = args.length > 0 ? args[0].toLowerCase() : "";
+        switch (subCommand) {
+            case "help":
+                return processHelpCommand(commandSender);
+            case "set":
+                return processSetCommand(commandSender, args);
+            case "take":
+                return processTakeCommand(commandSender, args);
+            case "give":
+                return processGiveCommand(commandSender, args);
+            case "save":
+                return processSaveCommand(commandSender);
+            case "today":
+                return processTodayCommand(commandSender);
+            case "update":
+                return processUpdateCommand(commandSender);
+        }
+
         if (commandSender instanceof Player) {
             Player player = (Player) commandSender;
-            
-            if (args.length != 0) {
-                String subCommand = args[0].toLowerCase();
-                switch (subCommand) {
-                    case "help":
-                        return processHelpCommand(player);
-                    case "set":
-                        return processSetCommand(player, args);
-                    case "take":
-                        return processTakeCommand(player, args);
-                    case "give":
-                        return processGiveCommand(player, args);
-                    case "save":
-                        return processSaveCommand(player);
-                    case "today":
-                        return processTodayCommand(player);
-                    case "balance":
-                        return processBalanceCommand(player);
-                    case "update":
-                        return processUpdateCommand(player);
-                }
-            } else {
-                if (player.hasPermission("cryptomarket.menu")) {
-                    if (plugin.getInvestorDao().getInvestor(player) == null) {
-                        player.sendMessage(config.getMessageErrorConnectingToDatabase());
-                        return true;
-                    }
-                    InventoryDrawer.getInstance().open(new MenuFrame(null, player));
-                } else {
-                    player.sendMessage(config.getMessageErrorNoPermission());
-                }
+            switch (subCommand) {
+                case "":
+                    return processMenuCommand(player);
+                case "balance":
+                    return processBalanceCommand(player);
+            }
+        } else {
+            commandSender.sendMessage("§4Only players can use this command!");
+            return true;
+        }
+        return false;
+    }
+
+    private boolean processMenuCommand(Player player) {
+        if (player.hasPermission("cryptomarket.menu")) {
+            if (plugin.getInvestorDao().getInvestor(player) == null) {
+                player.sendMessage(config.getMessageErrorConnectingToDatabase());
                 return true;
             }
-            return false;
+            InventoryDrawer.getInstance().open(new MenuFrame(null, player));
+        } else {
+            player.sendMessage(config.getMessageErrorNoPermission());
         }
-        commandSender.sendMessage("§4Only players can use this command!");
         return true;
     }
 
     /**
      * Process the update command
      *
-     * @param player player
+     * @param sender sender
      * @return true if the syntax is ok
      */
-    private boolean processUpdateCommand(Player player) {
-        if (player.hasPermission("cryptomarket.update")) {
+    private boolean processUpdateCommand(CommandSender sender) {
+        if (sender.hasPermission("cryptomarket.update")) {
             if (ExchangeRates.errorOccurred()) {
                 ExchangeRates rates = plugin.getExchangeRates();
                 rates.updateAll();
                 String mensagem = config.getMessageUpdatingContent();
                 mensagem = MessageFormat.format(mensagem, rates.getMinutesToUpdate());
-                player.sendMessage(mensagem);
+                sender.sendMessage(mensagem);
             } else {
-                player.sendMessage(config.getMessageContentAlreadyUptodate());
+                sender.sendMessage(config.getMessageContentAlreadyUptodate());
             }
         } else {
-            player.sendMessage(config.getMessageErrorNoPermission());
+            sender.sendMessage(config.getMessageErrorNoPermission());
         }
         return true;
     }
@@ -110,23 +114,23 @@ public class CryptoMarketCommand implements CommandExecutor, TabCompleter {
     /**
      * Process the today command
      *
-     * @param player player
+     * @param sender sender
      * @return true if the syntax is ok
      */
-    private boolean processTodayCommand(Player player) {
-        if (player.hasPermission("cryptomarket.today")) {
+    private boolean processTodayCommand(CommandSender sender) {
+        if (sender.hasPermission("cryptomarket.today")) {
             ExchangeRate er = plugin.getExchangeRates().getExchangeRate(LocalDate.now());
             if (er == null) {
-                player.sendMessage(config.getMessageCommandOutdatedData());
+                sender.sendMessage(config.getMessageCommandOutdatedData());
                 return true;
             }
-            player.sendMessage(config.getMessageCurrentExchangeRate());
+            sender.sendMessage(config.getMessageCurrentExchangeRate());
             for (String coin : config.getCoins()) {
-                player.sendMessage(MessageFormat.format(config.getMessageCurrentExchangeRatePerCoin(), coin,
+                sender.sendMessage(MessageFormat.format(config.getMessageCurrentExchangeRatePerCoin(), coin,
                         Formatter.formatCryptocoin(er.getCoinValue(coin))));
             }
         } else {
-            player.sendMessage(config.getMessageErrorNoPermission());
+            sender.sendMessage(config.getMessageErrorNoPermission());
         }
 
         return true;
@@ -186,20 +190,20 @@ public class CryptoMarketCommand implements CommandExecutor, TabCompleter {
     /**
      * Process the save command
      *
-     * @param player player
+     * @param sender sender
      * @return true if the syntax is ok
      */
-    private boolean processSaveCommand(Player player) {
-        if (player.hasPermission("cryptomarket.save")) {
-            player.sendMessage(config.getMessageSavingData());
+    private boolean processSaveCommand(CommandSender sender) {
+        if (sender.hasPermission("cryptomarket.save")) {
+            sender.sendMessage(config.getMessageSavingData());
             new BukkitRunnable() {
                 @Override
                 public void run() {
-                   plugin.getInvestorDao().saveAll();
+                    plugin.getInvestorDao().saveAll();
                 }
             }.runTaskAsynchronously(plugin);
         } else {
-            player.sendMessage(config.getMessageErrorNoPermission());
+            sender.sendMessage(config.getMessageErrorNoPermission());
         }
         return true;
     }
@@ -207,19 +211,19 @@ public class CryptoMarketCommand implements CommandExecutor, TabCompleter {
     /**
      * Process the give command
      *
-     * @param player player
-     * @param args args
+     * @param sender sender
+     * @param args   args
      * @return true if the syntax is ok
      */
-    private boolean processGiveCommand(Player player, String[] args) {
-        if (player.hasPermission("cryptomarket.give")) {
+    private boolean processGiveCommand(CommandSender sender, String[] args) {
+        if (sender.hasPermission("cryptomarket.give")) {
             //cm give nick amount coin
             if (args.length < 4) {
                 return false;
             }
             Player target = Bukkit.getPlayer(args[1]);
             if (target == null) {
-                player.sendMessage(config.getMessageErrorPlayerNotFound());
+                sender.sendMessage(config.getMessageErrorPlayerNotFound());
                 return false;
             }
             final BigDecimal amount;
@@ -229,25 +233,25 @@ public class CryptoMarketCommand implements CommandExecutor, TabCompleter {
                     throw new NumberFormatException();
                 }
             } catch (NumberFormatException ex) {
-                player.sendMessage(config.getMessageErrorInvalidAmount());
+                sender.sendMessage(config.getMessageErrorInvalidAmount());
                 return false;
             }
             final String coin = args[3].toUpperCase();
             if (!config.getCoins().contains(coin)) {
-                player.sendMessage(config.getMessageErrorInvalidCoin());
+                sender.sendMessage(config.getMessageErrorInvalidCoin());
                 return false;
             }
             Investor investor = plugin.getInvestorDao().getInvestor(target);
             if (investor == null) {
-                player.sendMessage(config.getMessageErrorConnectingToDatabase());
+                sender.sendMessage(config.getMessageErrorConnectingToDatabase());
                 return true;
             }
             plugin.getEconomy().deposit(coin, investor, amount);
-            player.sendMessage(MessageFormat.format(config.getMessagePlayerBalanceUpdated(), target.getName()));
+            sender.sendMessage(MessageFormat.format(config.getMessagePlayerBalanceUpdated(), target.getName()));
 
 
         } else {
-            player.sendMessage(config.getMessageErrorNoPermission());
+            sender.sendMessage(config.getMessageErrorNoPermission());
         }
 
         return true;
@@ -256,19 +260,19 @@ public class CryptoMarketCommand implements CommandExecutor, TabCompleter {
     /**
      * Process the take command
      *
-     * @param player player
+     * @param sender sender
      * @param args   args
      * @return true if the syntax is ok
      */
-    private boolean processTakeCommand(Player player, String[] args) {
-        if (player.hasPermission("cryptomarket.take")) {
+    private boolean processTakeCommand(CommandSender sender, String[] args) {
+        if (sender.hasPermission("cryptomarket.take")) {
             //cm take nick amount coin
             if (args.length < 4) {
                 return false;
             }
             Player target = Bukkit.getPlayer(args[1]);
             if (target == null) {
-                player.sendMessage(config.getMessageErrorPlayerNotFound());
+                sender.sendMessage(config.getMessageErrorPlayerNotFound());
                 return false;
             }
             final BigDecimal amount;
@@ -278,29 +282,29 @@ public class CryptoMarketCommand implements CommandExecutor, TabCompleter {
                     throw new NumberFormatException();
                 }
             } catch (NumberFormatException ex) {
-                player.sendMessage(config.getMessageErrorInvalidAmount());
+                sender.sendMessage(config.getMessageErrorInvalidAmount());
                 return false;
             }
             final String coin = args[3].toUpperCase();
             if (!config.getCoins().contains(coin)) {
-                player.sendMessage(config.getMessageErrorInvalidCoin());
+                sender.sendMessage(config.getMessageErrorInvalidCoin());
                 return false;
             }
             Investor investor = plugin.getInvestorDao().getInvestor(target);
 
             if (investor == null) {
-                player.sendMessage(config.getMessageErrorConnectingToDatabase());
+                sender.sendMessage(config.getMessageErrorConnectingToDatabase());
                 return true;
             }
             Economy economy = plugin.getEconomy();
             if (economy.has(coin, investor, amount)) {
                 economy.withdraw(coin, investor, amount);
-                player.sendMessage(MessageFormat.format(config.getMessagePlayerBalanceUpdated(), target.getName()));
+                sender.sendMessage(MessageFormat.format(config.getMessagePlayerBalanceUpdated(), target.getName()));
             } else {
-                player.sendMessage(config.getMessageErrorInsufficientBalance());
+                sender.sendMessage(config.getMessageErrorInsufficientBalance());
             }
         } else {
-            player.sendMessage(config.getMessageErrorNoPermission());
+            sender.sendMessage(config.getMessageErrorNoPermission());
         }
 
         return true;
@@ -309,19 +313,19 @@ public class CryptoMarketCommand implements CommandExecutor, TabCompleter {
     /**
      * Process the set command
      *
-     * @param player player
-     * @param args args
+     * @param sender sender
+     * @param args   args
      * @return true if the syntax is ok
      */
-    private boolean processSetCommand(Player player, String[] args) {
-        if (player.hasPermission("cryptomarket.set")) {
+    private boolean processSetCommand(CommandSender sender, String[] args) {
+        if (sender.hasPermission("cryptomarket.set")) {
             //cm set nick amount coin
             if (args.length < 4) {
                 return false;
             }
             Player target = Bukkit.getPlayer(args[1]);
             if (target == null) {
-                player.sendMessage(config.getMessageErrorPlayerNotFound());
+                sender.sendMessage(config.getMessageErrorPlayerNotFound());
                 return false;
             }
             final BigDecimal amount;
@@ -331,23 +335,23 @@ public class CryptoMarketCommand implements CommandExecutor, TabCompleter {
                     throw new NumberFormatException();
                 }
             } catch (NumberFormatException ex) {
-                player.sendMessage(config.getMessageErrorInvalidAmount());
+                sender.sendMessage(config.getMessageErrorInvalidAmount());
                 return false;
             }
             final String coin = args[3].toUpperCase();
             if (!config.getCoins().contains(coin)) {
-                player.sendMessage(config.getMessageErrorInvalidCoin());
+                sender.sendMessage(config.getMessageErrorInvalidCoin());
                 return false;
             }
             Investor investor = plugin.getInvestorDao().getInvestor(target);
             if (investor == null) {
-                player.sendMessage(config.getMessageErrorConnectingToDatabase());
+                sender.sendMessage(config.getMessageErrorConnectingToDatabase());
                 return true;
             }
             plugin.getEconomy().set(coin, investor, amount);
-            player.sendMessage(MessageFormat.format(config.getMessagePlayerBalanceUpdated(), target.getName()));
+            sender.sendMessage(MessageFormat.format(config.getMessagePlayerBalanceUpdated(), target.getName()));
         } else {
-            player.sendMessage(config.getMessageErrorNoPermission());
+            sender.sendMessage(config.getMessageErrorNoPermission());
         }
 
         return true;
@@ -356,11 +360,11 @@ public class CryptoMarketCommand implements CommandExecutor, TabCompleter {
     /**
      * Process the help command
      *
-     * @param player player
+     * @param sender sender
      * @return true if the syntax is ok
      */
-    private boolean processHelpCommand(Player player) {
-        config.getHelpCommandMessages().forEach(player::sendMessage);
+    private boolean processHelpCommand(CommandSender sender) {
+        config.getHelpCommandMessages().forEach(sender::sendMessage);
         return true;
     }
 }
