@@ -289,7 +289,13 @@ public class Economy {
         if (rate == null) {
             return Collections.emptyList();
         }
-        return investors.stream().sorted(Investor.comparator(rate)).limit(max).collect(Collectors.toList());
+        investors.sort(Investor.comparator(rate).reversed());
+
+        ArrayList<Investor> topList = new ArrayList<>();
+        for (int i = 0; i < investors.size() && i < max; i++) {
+            topList.add(investors.get(i));
+        }
+        return topList;
     }
 
     /**
