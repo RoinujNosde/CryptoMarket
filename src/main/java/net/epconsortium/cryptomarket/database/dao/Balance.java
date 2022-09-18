@@ -96,12 +96,11 @@ public class Balance {
         }
 
         if (received.doubleValue() >= totalPaid.doubleValue()) {
-            totalPurchased = new BigDecimal(0);
             totalPaid = new BigDecimal(0);
         } else {
-            totalPurchased = totalPurchased.subtract(sold);
             totalPaid = totalPaid.subtract(received);
         }
+        totalPurchased = totalPurchased.subtract(sold);
     }
 
     /**
