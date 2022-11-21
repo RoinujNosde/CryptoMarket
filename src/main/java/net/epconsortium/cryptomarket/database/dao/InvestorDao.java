@@ -97,6 +97,11 @@ public class InvestorDao {
     }
 
     public void unloadInvestor(@NotNull final OfflinePlayer player) {
+        Investor investor = getInvestor(player);
+        if (investor == null) { //not loaded
+            return;
+        }
+        Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> save(investor));
         ONLINE_INVESTORS.removeIf(i -> i.getUniqueId().equals(player.getUniqueId()));
     }
 
@@ -164,6 +169,22 @@ public class InvestorDao {
             }
         } catch (SQLException ex) {
             CryptoMarket.warn("Error saving online investors!");
+            ex.printStackTrace();
+        }
+    }
+
+    public void save(Investor investor) {
+        OfflinePlayer player = investor.getPlayer();
+        debug(String.format("Saving %s's data", player.getName()));
+
+        try (Connection connection = new ConnectionFactory(plugin).getConnection()) {
+            try (PreparedStatement ps = connection.prepareStatement("UPDATE investors SET balances=? WHERE uuid=?;")) {
+                ps.setString(1, gson.toJson(investor.getBalances(), BALANCES_TYPE));
+                ps.setString(2, player.getUniqueId().toString());
+                ps.executeUpdate();
+            }
+        } catch (SQLException ex) {
+            CryptoMarket.warn(String.format("Error saving investor (%s %s) data!", player.getName(), player.getUniqueId()));
             ex.printStackTrace();
         }
     }
