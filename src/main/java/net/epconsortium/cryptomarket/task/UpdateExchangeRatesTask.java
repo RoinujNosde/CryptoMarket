@@ -42,14 +42,11 @@ public class UpdateExchangeRatesTask extends Task {
 
     @Override
     public long getDelay() {
-        LocalDateTime tomorrow = LocalDate.now().plusDays(1).atTime(0, 1);
-        long delay = LocalDateTime.now().until(tomorrow, ChronoUnit.SECONDS) * 20;
-
-        return delay % getPeriod();
+        return 0;
     }
 
     @Override
     public long getPeriod() {
-        return configuration.getIntervalExchangeRatesUpdateInTicks();
+        return 60 * 20; //every minute
     }
 }

@@ -4,6 +4,7 @@ import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import net.epconsortium.cryptomarket.CryptoMarket;
+import net.epconsortium.cryptomarket.finances.CachedRates.CachedExchangeRate;
 import net.epconsortium.cryptomarket.util.Configuration;
 import org.bukkit.Bukkit;
 import org.jetbrains.annotations.NotNull;
@@ -34,8 +35,7 @@ public class ExchangeRates {
     private static ExchangeRates instance;
     private final CryptoMarket plugin;
     private final Configuration config;
-
-    private static int requests = 0;
+    private final CachedRates cachedRates;
     private static final String USER_AGENT = "Mozilla/5.0";
     private static final Map<LocalDate, ExchangeRate> RATES = new HashMap<>();
     private static LocalDate lastCurrentDay = ZonedDateTime.now(UTC).toLocalDate();
@@ -46,6 +46,18 @@ public class ExchangeRates {
     private ExchangeRates(CryptoMarket plugin) {
         this.plugin = Objects.requireNonNull(plugin);
         config = new Configuration(plugin);
+        cachedRates = new CachedRates(plugin);
+        config.getCoins().forEach(coin -> {
+            for (Map.Entry<LocalDate, CachedExchangeRate> entry : cachedRates.getRates(coin).entrySet()) {
+                LocalDate date = entry.getKey();
+                ExchangeRate er = getExchangeRate(date);
+                if (er == null) {
+                    er = new ExchangeRate();
+                }
+                er.update(coin, entry.getValue().getCoinValue());
+                RATES.put(date, er);
+            }
+        });
     }
 
     public static ExchangeRates getInstance(@NotNull CryptoMarket plugin) {
@@ -64,8 +76,8 @@ public class ExchangeRates {
         setDailyError(false);
         //Updating
         Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
-            updateCurrentExchangeRate0();
             updateDailyRates0();
+            updateCurrentExchangeRate0();
         });
     }
 
@@ -160,27 +172,6 @@ public class ExchangeRates {
     }
 
     /**
-     * Causes the Async Thread to sleep so that the 5 requests per minute limit
-     * (of the AlphaVantage API) is not trespassed
-     */
-    @SuppressWarnings("SleepWhileHoldingLock")
-    private static synchronized void awaitServerLimit() {
-        if (requests < 5) {
-            //Requests are less than 5, so you don't need to sleep
-            requests++;
-            return;
-        }
-        //Requests exceeded, sleeping...
-        try {
-            Thread.sleep(70 * 1000);
-        } catch (InterruptedException ex) {
-            ex.printStackTrace();
-        }
-        //Resetting requests count
-        requests = 1;
-    }
-
-    /**
      * Returns the connection response in a JsonObject
      *
      * @param connection connection
@@ -238,7 +229,9 @@ public class ExchangeRates {
     private void updateDailyRates0() {
         HashMap<String, Boolean> errors = new HashMap<>();
         for (String coin : config.getCoins()) {
-            awaitServerLimit();
+            if (cachedRates.isCached(coin)) {
+                continue;
+            }
             try {
                 URL url = getCurrencyDailyUrl(coin);
                 HttpURLConnection connection = openHttpConnection(url);
@@ -248,13 +241,12 @@ public class ExchangeRates {
                     JsonObject json = extractJsonFrom(connection);
                     JsonObject jo = json.getAsJsonObject("Time Series (Digital Currency Daily)");
                     if (jo == null) {
-                        plugin.getLogger().warning("API limit exceeded. Wait a few minutes and try again.");
                         CryptoMarket.debug(json.toString());
                         errors.put(coin, true);
                         continue;
                     }
                     Set<Map.Entry<String, JsonElement>> entries = jo.entrySet();
-
+                    Map<LocalDate, BigDecimal> cache = new HashMap<>();
                     entries.forEach(entry -> {
                         ZonedDateTime date = ZonedDateTime.of(LocalDate.parse(entry.getKey()), LocalTime.MIN, UTC);
                         BigDecimal value = entry.getValue().getAsJsonObject().get("4a. close ("
@@ -265,7 +257,9 @@ public class ExchangeRates {
                         }
                         er.update(coin, value);
                         RATES.put(date.toLocalDate(), er);
+                        cache.put(date.toLocalDate(), value);
                     });
+                    cachedRates.saveRates(coin, cache);
                 } else {
                     errors.put(coin, true);
                 }
@@ -285,7 +279,10 @@ public class ExchangeRates {
     private void updateCurrentExchangeRate0() {
         boolean error = false;
         for (String coin : config.getCoins()) {
-            awaitServerLimit();
+            CachedExchangeRate cached = cachedRates.getCachedExchangeRate(coin, LocalDate.now());
+            if (cached != null && cached.isFresh(config.getIntervalExchangeRatesUpdateInMinutes())) {
+                continue;
+            }
             try {
                 HttpURLConnection connection = openHttpConnection(getExchangeRateUrl(coin));
                 int responseCode = connection.getResponseCode();
@@ -294,7 +291,6 @@ public class ExchangeRates {
 
                     JsonElement realtimeCurrencyExchangeRate = json.get("Realtime Currency Exchange Rate");
                     if (realtimeCurrencyExchangeRate == null) {
-                        plugin.getLogger().warning("API limit exceeded. Wait a few minutes and try again.");
                         CryptoMarket.debug(json.toString());
                         error = true;
                         continue;
@@ -310,6 +306,7 @@ public class ExchangeRates {
 
                     er.update(coin, exchangeRate);
                     RATES.put(date, er);
+                    cachedRates.saveRates(coin, Collections.singletonMap(date, exchangeRate));
                 } else {
                     error = true;
                 }

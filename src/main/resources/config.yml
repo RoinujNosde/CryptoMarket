@@ -1,7 +1,7 @@
 #API KEY for accessing the cryptocoins values, USE THE DEFAULT KEY FOR TESTING ONLY
 api-key: 99X0JFXBLX2YRZA7
 #The interval to update the Exchange Rates (in minutes)
-#(Please note that the API has a limit of 500 requests per day,
+#(Please note that the API has a limit of 25 requests per day,
 #so if you set an interval that trespasses this limit, the plugin will automatically choose one)
 update-interval: 60
 #The interval to save the investors data (in minutes)
@@ -22,8 +22,6 @@ physical-currency: USD
 #Coins that the plugin will work with (you can find a list of valid coin in the digital_currency_list.csv file inside the JAR)
 coins:
 - BTC
-- LTC
-- ETH
 #The main menu of the plugin, accessed using /cryptomarket
 menu:
    #Name of the menu

@@ -2,8 +2,10 @@ package net.epconsortium.cryptomarket.conversation;
 
 import net.epconsortium.cryptomarket.CryptoMarket;
 import net.epconsortium.cryptomarket.conversation.prompt.ExitWarningPrompt;
+import net.epconsortium.cryptomarket.database.dao.Investor;
 import net.epconsortium.cryptomarket.finances.Negotiation;
 import net.epconsortium.cryptomarket.util.Configuration;
+import org.bukkit.ChatColor;
 import org.bukkit.conversations.Conversation;
 import org.bukkit.conversations.ConversationContext;
 import org.bukkit.conversations.ConversationFactory;
@@ -13,14 +15,10 @@ import org.bukkit.entity.Player;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
-import net.epconsortium.cryptomarket.database.dao.InvestorDao;
-import net.epconsortium.cryptomarket.database.dao.Investor;
-import org.bukkit.ChatColor;
-import org.bukkit.scheduler.BukkitRunnable;
 
 /**
  * Class used to have a conversation with the player 
- * 
+ *
  * @author roinujnosde
  */
 public class NegotiationConversation implements ConversationPrefix {

@@ -1,7 +1,6 @@
 package net.epconsortium.cryptomarket.util;
 
 import net.epconsortium.cryptomarket.CryptoMarket;
-
 import org.bukkit.ChatColor;
 import org.bukkit.configuration.file.FileConfiguration;
 
@@ -104,25 +103,24 @@ public class Configuration {
     }
 
     /**
-     * Returns the interval to update the Exchange Rates in server ticks
+     * Returns the interval to update the Exchange Rates in minutes
      *
      * @return the interval
      */
-    public long getIntervalExchangeRatesUpdateInTicks() {
-        final int maxRequests = 500;
+    public int getIntervalExchangeRatesUpdateInMinutes() {
+        final int maxRequests = 25;
         final int dayInMinutes = 1440;
-        double requests = getCoins().size() * 2;
+        double requests = getCoins().size();
 
         double interval = getConfig().getInt("update-interval", 60);
         double minInterval = dayInMinutes / (maxRequests / requests);
 
         if (minInterval > interval) {
             interval = Math.ceil(minInterval);
-            CryptoMarket.warn("Update interval set to " + interval + ""
-                    + " to obey the API limit!");
+            CryptoMarket.warn("Update interval set to " + interval + " to obey the API limit!");
         }
 
-        return (long) (interval * 60 * 20);
+        return (int) (interval);
     }
 
     /**
@@ -133,15 +131,6 @@ public class Configuration {
      */
     public long getIntervalSavingInvestorsInTicks() {
         return getConfig().getLong("saving-interval", 10) * 60 * 20;
-    }
-
-    /**
-     * Returns the interval to update the Exchange Rates in milliseconds
-     *
-     * @return the interval
-     */
-    public long getIntervalExchangeRatesUpdateInMillis() {
-        return getIntervalExchangeRatesUpdateInTicks() / 20 * 1000;
     }
 
     /**
