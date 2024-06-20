@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.2.0](https://github.com/RoinujNosde/CryptoMarket/compare/v2.1.3...v2.2.0) (2024-06-20)
+
+
+### Features
+
+* implemented rates caching ([03f006d](https://github.com/RoinujNosde/CryptoMarket/commit/03f006d9da02542936cb7dc8dc3429a1d62a1517))
+
 ## [2.1.3](https://github.com/RoinujNosde/CryptoMarket/compare/v2.1.2...v2.1.3) (2022-11-21)
 
 
